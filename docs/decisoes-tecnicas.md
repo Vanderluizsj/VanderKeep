@@ -98,7 +98,7 @@ VanderKeep/
 │   │   │   └── Migracoes/              # EF Core Migrations
 │   │   ├── Repositorios/               # NoteRepository.cs, CategoryRepository.cs
 │   │   ├── Servicos/                   # SystemDateTimeProvider.cs
-│   │   └── InjecaoDependencia.cs
+│   │   └── DependencyInjection.cs
 │   └── Vanderkeep.Web/
 │       ├── Controllers/                # HomeController, AccountController, NotesController, CategoriesController, TrashController, ErrorController
 │       ├── ViewModels/                 # Account/, Notes/, Categories/, Trash/
@@ -385,14 +385,14 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
 - **Entregáveis:** `docs/planejamento-de-produto.md`, `docs/decisoes-tecnicas.md`, `docs/progresso.md` e alinhamento de referências em `docs/PROCESS.md` e `.agents/agents/architect/agent.md`.
 - **Status:** Concluída e aprovada.
 
-### Fase 1 — Fundação da Solução e Infraestrutura Base
+### Fase 1 — Fundação da Solução e Infraestrutura Base *(Concluída)*
 - **Objetivo:** estruturar a solução Clean Architecture em `.NET 10` seguindo a convenção de pastas/namespaces aprovada, configurar projetos, dependências, DI base, logging, Git, User Secrets e ambiente de testes.
 - **Entregáveis:**
   - `Vanderkeep.sln` e projetos `Vanderkeep.Dominio`, `Vanderkeep.Aplicacao`, `Vanderkeep.Infraestrutura`, `Vanderkeep.Web`, `Vanderkeep.TestesUnitarios` e `Vanderkeep.TestesIntegracao`.
   - Referências entre projetos respeitando rigorosamente a direção da Clean Architecture.
   - Inicialização do Git + `.gitignore`, layout base Bootstrap 5 e páginas globais de erro (`404`, `403`, `500`).
-  - Configuração base de `VanderkeepDbContext`, User Secrets apontando para `VanderkeepDb` / `VanderkeepDb_Test` no SQL Server Docker (`sqlserver-backend`) e verificação de build + execução dos projetos de teste.
-- **Critério de conclusão:** `dotnet build` e `dotnet test` verdes, estrutura auditada pelo Reviewer.
+  - Configuração base de `VanderkeepDbContext`, inicialização de User Secrets em `Vanderkeep.Web` e `Vanderkeep.TestesIntegracao` e verificação de build + execução dos projetos de teste.
+- **Status:** Concluída e aprovada em revisão técnica independente (2026-11-26).
 
 ### Fase 2 — Domínio e Persistência Core (Notas, Categorias N:N e Soft Delete)
 - **Objetivo:** implementar o modelo de domínio completo (incluindo máquina de estados Ativa/Arquivada/Lixeira), mapeamentos Fluent API, repositórios, `UnitOfWork` e migrations iniciais.

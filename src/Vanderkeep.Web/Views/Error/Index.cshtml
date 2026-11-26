@@ -1,0 +1,20 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <h1 class="display-5 fw-bold text-danger mb-3">@Model.Title</h1>
+            <p class="lead text-muted mb-4">@Model.Message</p>
+            @if (Model.ShowRequestId)
+            {
+                <p class="small text-secondary mb-4">
+                    Código de rastreamento: <code>@Model.RequestId</code>
+                </p>
+            }
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Voltar ao início</a>
+        </div>
+    </div>
+</section>
