@@ -1,8 +1,8 @@
-# Vanderkeep — Processo de Trabalho
+# VKeeper — Processo de Trabalho
 
 ## 1. Objetivo
 
-Definir o fluxo de trabalho dos agentes de IA envolvidos no planejamento, desenvolvimento e manutenção do Vanderkeep.
+Definir o fluxo de trabalho dos agentes de IA envolvidos no planejamento, desenvolvimento e manutenção do VKeeper.
 
 O objetivo é garantir continuidade, rastreabilidade, qualidade e consistência entre as diferentes etapas do projeto.
 
@@ -147,4 +147,4 @@ Não registrar como concluída uma atividade sem validação suficiente.
 
 A documentação aprovada é a referência para o desenvolvimento.
 
-O objetivo não é apenas produzir código funcional, mas manter uma aplicação coerente, segura, sustentável e alinhada aos requisitos do Vanderkeep.
+O objetivo não é apenas produzir código funcional, mas manter uma aplicação coerente, segura, sustentável e alinhada aos requisitos do VKeeper.

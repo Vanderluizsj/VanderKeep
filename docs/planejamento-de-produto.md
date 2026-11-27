@@ -1,4 +1,4 @@
-# Vanderkeep — Planejamento de Produto
+# VKeeper — Planejamento de Produto
 
 > **Status do documento:** Aprovado (Fase 0 concluída)  
 > **Idioma da interface:** Português Brasileiro (`pt-BR`)  
@@ -8,7 +8,7 @@
 
 ## 1. Visão geral e objetivos
 
-O **Vanderkeep** é uma aplicação web de gerenciamento de anotações pessoais construída com o ecossistema Microsoft (.NET, ASP.NET Core MVC, Entity Framework Core e SQL Server).
+O **VKeeper** é uma aplicação web de gerenciamento de anotações pessoais construída com o ecossistema Microsoft (.NET, ASP.NET Core MVC, Entity Framework Core e SQL Server).
 
 O produto tem dois objetivos complementares:
 
@@ -212,7 +212,7 @@ Itens intencionalmente postergados para evoluções futuras, após estabilizaç�
 - Suporte a formatação rica / Markdown na descrição da nota (com sanitização segura de HTML).
 - Cores ou ícones personalizáveis nas categorias.
 - Confirmação de e-mail e recuperação de senha via envio de e-mail (SMTP / provedor transacional).
-- Endpoints REST/JSON complementares no próprio `Vanderkeep.Web` para ações instantâneas sem recarregamento ou integrações futuras.
+- Endpoints REST/JSON complementares no próprio `VKeeper.Web` para ações instantâneas sem recarregamento ou integrações futuras.
 - Compartilhamento de notas entre usuários.
 - Exportação de notas (ex.: JSON, Markdown ou PDF).
 - Exclusão de conta pelo próprio usuário (LGPD / autoatendimento).

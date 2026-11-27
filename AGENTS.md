@@ -1,8 +1,8 @@
-# Vanderkeep — Regras Gerais dos Agentes
+# VKeeper — Regras Gerais dos Agentes
 
 ## 1. Identidade do projeto
 
-O Vanderkeep é uma aplicação de gerenciamento de anotações pessoais, desenvolvida com C#, ASP.NET Core MVC e Clean Architecture.
+O VKeeper é uma aplicação de gerenciamento de anotações pessoais, desenvolvida com C#, ASP.NET Core MVC e Clean Architecture.
 
 A documentação existente em `docs/` representa a referência oficial dos requisitos, decisões técnicas e planejamento do projeto.
 

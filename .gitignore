@@ -55,6 +55,7 @@ artifacts/
 secrets.json
 .env
 .env.*
+appsettings.Development.json
 appsettings.Local.json
 appsettings.*.Local.json
 

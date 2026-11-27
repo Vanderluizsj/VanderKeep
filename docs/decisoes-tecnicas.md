@@ -1,4 +1,4 @@
-# Vanderkeep — Decisões Técnicas e Arquitetura
+# VKeeper — Decisões Técnicas e Arquitetura
 
 > **Status do documento:** Aprovado (Fase 0 concluída)  
 > **Convenção de status das decisões:**  
@@ -21,18 +21,18 @@
 ### 1.2. Endpoints REST complementares
 - **Status:** `Aprovada`
 - **Decisão:** **não expor endpoints REST/JSON no MVP**; manter 100% ASP.NET Core MVC clássico (PRG).
-- **Justificativa:** evita manter duas superfícies de contrato (Views MVC + API JSON) e elimina código JavaScript customizado desnecessário na primeira versão. Caso surja necessidade concreta pós-MVP, a camada `Aplicacao` já estará pronta para ser consumida tanto por controllers MVC quanto por endpoints REST no mesmo projeto `Vanderkeep.Web`.
+- **Justificativa:** evita manter duas superfícies de contrato (Views MVC + API JSON) e elimina código JavaScript customizado desnecessário na primeira versão. Caso surja necessidade concreta pós-MVP, a camada `Aplicacao` já estará pronta para ser consumida tanto por controllers MVC quanto por endpoints REST no mesmo projeto `VKeeper.Web`.
 
 ### 1.3. Organização interna da camada `Aplicacao`
 - **Status:** `Aprovada`
-- **Decisão:** organizar `Vanderkeep.Aplicacao` por **Feature / Caso de Uso** (`Notas/`, `Categorias/` com subpastas por operação como `CriarNota/`, `AtualizarNota/`, `ListarNotas/`, `Lixeira/`, etc.), mantendo **Application Services enxutos** (`NoteService`, `CategoryService`), **Result Pattern** e **FluentValidation** (sem MediatR/CQRS).
+- **Decisão:** organizar `VKeeper.Aplicacao` por **Feature / Caso de Uso** (`Notas/`, `Categorias/` com subpastas por operação como `CriarNota/`, `AtualizarNota/`, `ListarNotas/`, `Lixeira/`, etc.), mantendo **Application Services enxutos** (`NoteService`, `CategoryService`), **Result Pattern** e **FluentValidation** (sem MediatR/CQRS).
 - **Justificativa:** une a alta coesão do agrupamento por feature (todos os DTOs/requests/validators de uma operação ficam juntos) com a simplicidade e rastreabilidade direta de serviços de aplicação bem delimitados.
 
 ### 1.4. Convenção de idioma em pastas, namespaces e código
 - **Status:** `Aprovada` *(alinhada em `AGENTS.md`, seção 2)*
 - **Decisão:**
-  - **Projetos, pastas e namespaces de código autoral:** em **português** (`Vanderkeep.Dominio`, `Entidades`, `Excecoes`, `Vanderkeep.Aplicacao`, `Notas/CriarNota`, `Vanderkeep.Infraestrutura`, `Persistencia/Configuracoes`, `Repositorios`, `Vanderkeep.TestesUnitarios`, `Vanderkeep.TestesIntegracao`).
-  - **Pastas e arquivos exigidos ou convencionados pelo framework .NET / ASP.NET Core MVC:** permanecem em **inglês** (`Vanderkeep.Web`, `Controllers`, `Views`, `Shared`, `ViewModels`, `wwwroot`, `Identity`, `Enums`, `Program.cs`, `appsettings.json`).
+  - **Projetos, pastas e namespaces de código autoral:** em **português** (`VKeeper.Dominio`, `Entidades`, `Excecoes`, `VKeeper.Aplicacao`, `Notas/CriarNota`, `VKeeper.Infraestrutura`, `Persistencia/Configuracoes`, `Repositorios`, `VKeeper.TestesUnitarios`, `VKeeper.TestesIntegracao`).
+  - **Pastas e arquivos exigidos ou convencionados pelo framework .NET / ASP.NET Core MVC:** permanecem em **inglês** (`VKeeper.Web`, `Controllers`, `Views`, `Shared`, `ViewModels`, `wwwroot`, `Identity`, `Enums`, `Program.cs`, `appsettings.json`).
   - **Classes, métodos, propriedades, variáveis e comentários técnicos:** em **inglês** (conforme `AGENTS.md`, seção 2).
 
 ---
@@ -60,20 +60,20 @@
 - **Status:** `Aprovada`
 
 ```text
-VanderKeep/
+VKeeper/
 ├── docs/
 │   ├── PROCESS.md
 │   ├── planejamento-de-produto.md
 │   ├── decisoes-tecnicas.md
 │   └── progresso.md
 ├── src/
-│   ├── Vanderkeep.Dominio/
+│   ├── VKeeper.Dominio/
 │   │   ├── Comum/                      # BaseEntity e tipos base do domínio
 │   │   ├── Entidades/                  # Note.cs, Category.cs, NoteCategory.cs
 │   │   ├── Enums/                      # NotePriority.cs (termo técnico padrão .NET)
 │   │   ├── Excecoes/                   # DomainException.cs e exceções específicas
 │   │   └── Interfaces/                 # INoteRepository.cs, ICategoryRepository.cs, IUnitOfWork.cs
-│   ├── Vanderkeep.Aplicacao/
+│   ├── VKeeper.Aplicacao/
 │   │   ├── Comum/                      # Result.cs, PagedResult.cs, ICurrentUserService.cs, IDateTimeProvider.cs
 │   │   ├── Notas/
 │   │   │   ├── INoteService.cs
@@ -89,17 +89,17 @@ VanderKeep/
 │   │       ├── CriarCategoria/         # CreateCategoryRequest.cs, CreateCategoryValidator.cs
 │   │       ├── AtualizarCategoria/     # UpdateCategoryRequest.cs, UpdateCategoryValidator.cs
 │   │       └── ListarCategorias/       # CategoryListItemDto.cs
-│   ├── Vanderkeep.Infraestrutura/
+│   ├── VKeeper.Infraestrutura/
 │   │   ├── Identity/                   # ApplicationUser.cs (: IdentityUser<Guid>), configuração Identity
 │   │   ├── Persistencia/
-│   │   │   ├── VanderkeepDbContext.cs
+│   │   │   ├── VKeeperDbContext.cs
 │   │   │   ├── UnitOfWork.cs
 │   │   │   ├── Configuracoes/          # NoteConfiguration.cs, CategoryConfiguration.cs, NoteCategoryConfiguration.cs
 │   │   │   └── Migracoes/              # EF Core Migrations
 │   │   ├── Repositorios/               # NoteRepository.cs, CategoryRepository.cs
 │   │   ├── Servicos/                   # SystemDateTimeProvider.cs
 │   │   └── DependencyInjection.cs
-│   └── Vanderkeep.Web/
+│   └── VKeeper.Web/
 │       ├── Controllers/                # HomeController, AccountController, NotesController, CategoriesController, TrashController, ErrorController
 │       ├── ViewModels/                 # Account/, Notes/, Categories/, Trash/
 │       ├── Views/                      # Home/, Account/, Notes/, Categories/, Trash/, Shared/
@@ -109,26 +109,26 @@ VanderKeep/
 │       ├── appsettings.Development.json
 │       └── Program.cs                  # Composition Root
 ├── tests/
-│   ├── Vanderkeep.TestesUnitarios/
-│   └── Vanderkeep.TestesIntegracao/
-└── Vanderkeep.sln
+│   ├── VKeeper.TestesUnitarios/
+│   └── VKeeper.TestesIntegracao/
+└── VKeeper.sln
 ```
 
 ### Direção das dependências (regra inviolável)
 
 ```mermaid
 flowchart TD
-    Web["Vanderkeep.Web (ASP.NET Core MVC)"] --> App["Vanderkeep.Aplicacao"]
-    Web -.->|"Apenas Composition Root (DI) e Identity"| Infra["Vanderkeep.Infraestrutura"]
+    Web["VKeeper.Web (ASP.NET Core MVC)"] --> App["VKeeper.Aplicacao"]
+    Web -.->|"Apenas Composition Root (DI) e Identity"| Infra["VKeeper.Infraestrutura"]
     Infra --> App
-    Infra --> Domain["Vanderkeep.Dominio"]
+    Infra --> Domain["VKeeper.Dominio"]
     App --> Domain
 ```
 
-- `Vanderkeep.Dominio` **não referencia** nenhum outro projeto nem pacotes externos de infraestrutura (EF Core, Identity, ASP.NET).
-- `Vanderkeep.Aplicacao` referencia **apenas** `Vanderkeep.Dominio` (e `FluentValidation`). **Não referencia** EF Core nem ASP.NET Core.
-- `Vanderkeep.Infraestrutura` implementa as abstrações de persistência e Identity, referenciando `Aplicacao` e `Dominio`.
-- `Vanderkeep.Web` referencia `Aplicacao` e usa `Infraestrutura` exclusivamente para registro de dependências no `Program.cs` (Composition Root) e integração de Identity em `AccountController` (`NotesController`, `CategoriesController` e `TrashController` conversam exclusivamente com `Aplicacao`).
+- `VKeeper.Dominio` **não referencia** nenhum outro projeto nem pacotes externos de infraestrutura (EF Core, Identity, ASP.NET).
+- `VKeeper.Aplicacao` referencia **apenas** `VKeeper.Dominio` (e `FluentValidation`). **Não referencia** EF Core nem ASP.NET Core.
+- `VKeeper.Infraestrutura` implementa as abstrações de persistência e Identity, referenciando `Aplicacao` e `Dominio`.
+- `VKeeper.Web` referencia `Aplicacao` e usa `Infraestrutura` exclusivamente para registro de dependências no `Program.cs` (Composition Root) e integração de Identity em `AccountController` (`NotesController`, `CategoriesController` e `TrashController` conversam exclusivamente com `Aplicacao`).
 
 ---
 
@@ -138,8 +138,8 @@ flowchart TD
 | --- | --- | --- |
 | **Dominio** | Entidades com estado consistente e métodos de comportamento (incluindo máquina de estados Ativa/Arquivada/Lixeira), invariantes de negócio, exceções de domínio, enums (`NotePriority`), interfaces de repositório/UoW. | Anotações de EF Core (`[Table]`, `[Column]`), `DbContext`, `IdentityUser`, lógica HTTP ou ViewModels. |
 | **Aplicacao** | Casos de uso agrupados por feature (`NoteService`, `CategoryService`, requests, DTOs, queries, validators `FluentValidation`), `Result`/`PagedResult`, abstrações como `ICurrentUserService`. | Dependência de `Microsoft.EntityFrameworkCore`, `HttpContext`, `IActionResult`, SQL direto ou `TempData`. |
-| **Infraestrutura** | `VanderkeepDbContext`, `ApplicationUser : IdentityUser<Guid>`, configurações Fluent API, migrations, implementação de repositórios e `UnitOfWork`, registro de DI. | Regras de negócio duplicadas, lógica de apresentação ou dependência de `Vanderkeep.Web`. |
-| **Web** | Controllers MVC (`NotesController`, `CategoriesController`, `TrashController`, `AccountController`), ViewModels, DataAnnotations de UI, Razor Views, filtros anti-CSRF, tratamento global de erro HTTP, `TempData` (PRG), composição de DI. | Consultas diretas ao `VanderkeepDbContext`, regras de negócio críticas (unicidade, ownership, transições de estado), strings de conexão em código. |
+| **Infraestrutura** | `VKeeperDbContext`, `ApplicationUser : IdentityUser<Guid>`, configurações Fluent API, migrations, implementação de repositórios e `UnitOfWork`, registro de DI. | Regras de negócio duplicadas, lógica de apresentação ou dependência de `VKeeper.Web`. |
+| **Web** | Controllers MVC (`NotesController`, `CategoriesController`, `TrashController`, `AccountController`), ViewModels, DataAnnotations de UI, Razor Views, filtros anti-CSRF, tratamento global de erro HTTP, `TempData` (PRG), composição de DI. | Consultas diretas ao `VKeeperDbContext`, regras de negócio críticas (unicidade, ownership, transições de estado), strings de conexão em código. |
 
 ---
 
@@ -149,7 +149,7 @@ flowchart TD
 
 ### 5.1. Estratégia de chaves e isolamento do Identity
 - Todas as entidades utilizam `Guid` gerado por `Guid.CreateVersion7()` (nativo no .NET 10), combinando imprevisibilidade nas URLs com ordenação temporal eficiente para índices clusterizados no SQL Server.
-- `ApplicationUser : IdentityUser<Guid>` reside exclusivamente em `Vanderkeep.Infraestrutura.Identity`.
+- `ApplicationUser : IdentityUser<Guid>` reside exclusivamente em `VKeeper.Infraestrutura.Identity`.
 - No `Dominio`, `Note` e `Category` armazenam apenas `Guid UserId`, preservando o núcleo livre de acoplamento ao ASP.NET Core Identity.
 
 ### 5.2. Entidades, Enums e Máquina de Estados
@@ -244,7 +244,7 @@ erDiagram
 ## 6. Estratégia de persistência
 
 - **Status:** `Aprovada`
-- **Abordagem:** Entity Framework Core 10 Code-First com migrations versionadas em `Vanderkeep.Infraestrutura/Persistencia/Migracoes/` e mapeamento exclusivamente via **Fluent API** (`IEntityTypeConfiguration<T>`).
+- **Abordagem:** Entity Framework Core 10 Code-First com migrations versionadas em `VKeeper.Infraestrutura/Persistencia/Migracoes/` e mapeamento exclusivamente via **Fluent API** (`IEntityTypeConfiguration<T>`).
 - **Acesso a dados:** repositórios específicos por agregado (`INoteRepository`, `ICategoryRepository`) + `IUnitOfWork` (`SaveChangesAsync`), sem repositório genérico expondo `IQueryable`.
 - **Otimização de consultas:**
   - `AsNoTracking()` em todas as consultas de listagem e visualização.
@@ -303,7 +303,7 @@ erDiagram
   - Registrar eventos relevantes (login falho/lockout, erros de persistência, exceções não tratadas com `TraceIdentifier`).
   - Utilizar templates estruturados sem interpolação de string no log.
   - Nunca registrar senhas, cookies, connection strings ou conteúdo integral sensível das notas em logs de produção.
-  - Evolução futura para Serilog ou OpenTelemetry poderá ser feita apenas no Composition Root (`Vanderkeep.Web`) sem impactar `Dominio` ou `Aplicacao`.
+  - Evolução futura para Serilog ou OpenTelemetry poderá ser feita apenas no Composition Root (`VKeeper.Web`) sem impactar `Dominio` ou `Aplicacao`.
 
 ---
 
@@ -312,11 +312,11 @@ erDiagram
 - **Status:** `Aprovada`
 - **Framework:** **xUnit**.
 - **Projetos de teste:**
-  1. **`tests/Vanderkeep.TestesUnitarios`** (execução rápida, sem I/O):
+  1. **`tests/VKeeper.TestesUnitarios`** (execução rápida, sem I/O):
      - Testes das entidades e invariantes de `Dominio` (`Note`, `Category`, transições Ativa/Arquivada/Lixeira, bloqueio de edição/pin na lixeira, normalização de título, associação N:N sem duplicatas).
      - Testes dos serviços de `Aplicacao` e validators (`FluentValidation`), validando regras de negócio (unicidade por usuário, rejeição de categoria de outro usuário, retorno `NotFound` em acesso indevido).
-  2. **`tests/Vanderkeep.TestesIntegracao`** (`WebApplicationFactory<Program>` + **SQL Server real**):
-     - Leitura da connection string de teste por prioridade: **Variável de Ambiente (`ConnectionStrings__TestConnection`) -> User Secrets** — garantindo execução idêntica contra o banco `VanderkeepDb_Test` no container local `sqlserver-backend` em desenvolvimento **e** contra o *service container* SQL Server no workflow futuro do GitHub Actions, sem alterar código de teste.
+  2. **`tests/VKeeper.TestesIntegracao`** (`WebApplicationFactory<Program>` + **SQL Server real**):
+     - Leitura da connection string de teste por prioridade: **Variável de Ambiente (`ConnectionStrings__TestConnection`) -> User Secrets** — garantindo execução idêntica contra o banco `VKeeperDb_Test` no container local `sqlserver-backend` em desenvolvimento **e** contra o *service container* SQL Server no workflow futuro do GitHub Actions, sem alterar código de teste.
      - Testes de persistência: migrations reais, constraint única `(UserId, NormalizedTitle)`, relacionamento N:N, exclusão de categoria preservando notas, contagem de notas ignorando lixeira e exclusão permanente.
      - Testes ponta a ponta HTTP/MVC: registro, login, redirecionamento anônimo, fluxo CRUD + Pin + Arquivar + Lixeira (mover, restaurar, excluir permanentemente, esvaziar) e **testes explícitos anti-IDOR** entre Usuário A e Usuário B.
 
@@ -327,20 +327,21 @@ erDiagram
 - **Status:** `Aprovada`
 - **Arquivos e provedores de configuração:**
   - `appsettings.json`: defaults seguros, níveis de log e estrutura sem segredos (connection string vazia).
-  - `appsettings.Development.json`: configurações específicas de desenvolvimento (sem senhas).
-  - **.NET User Secrets** (`dotnet user-secrets` no `Vanderkeep.Web` e em `Vanderkeep.TestesIntegracao`): armazena as connection strings locais apontando para o SQL Server em Docker (`Database=VanderkeepDb` e `Database=VanderkeepDb_Test`).
-  - **Variáveis de ambiente** (`ConnectionStrings__DefaultConnection` e `ConnectionStrings__TestConnection`): padrão para o workflow de CI (GitHub Actions) e futura produção.
-- **Migrations:** aplicadas explicitamente via `dotnet ef database update` durante o desenvolvimento (e automaticamente apenas no bootstrap do banco descartável de `Vanderkeep.TestesIntegracao`). Não executar `Database.Migrate()` automaticamente em produção sem estratégia controlada.
+  - `appsettings.Development.Example.json`: template versionado no Git documentando a estrutura esperada de `ConnectionStrings:DefaultConnection` (sem senhas reais).
+  - `appsettings.Development.json` (**ignorado no `.gitignore`**): armazena a `ConnectionStrings:DefaultConnection` local de desenvolvimento apontando para o SQL Server em Docker (`Server=localhost,1433;Database=VKeeperDb;...`), sem jamais ser versionado no GitHub.
+  - **.NET User Secrets** (opcional em desenvolvimento e suportado em `VKeeper.TestesIntegracao` para `ConnectionStrings:TestConnection`).
+  - **Variáveis de ambiente / GitHub Actions Secrets** (`ConnectionStrings__DefaultConnection` e `ConnectionStrings__TestConnection`): padrão oficial para CI e deploy automático em produção.
+- **Migrations:** aplicadas explicitamente via `dotnet ef database update` durante o desenvolvimento (e automaticamente apenas no bootstrap do banco descartável de `VKeeper.TestesIntegracao`). Não executar `Database.Migrate()` automaticamente em produção sem estratégia controlada.
 
 ---
 
 ## 12. Infraestrutura, CI e publicação
 
 - **Banco de dados em desenvolvimento (`Aprovada`):**
-  - Instância **SQL Server Express em container Docker** já existente no ambiente local (`sqlserver-backend`), criando bancos dedicados **`VanderkeepDb`** (desenvolvimento) e **`VanderkeepDb_Test`** (testes de integração locais), configurados via User Secrets.
-- **Controle de versão e Workflow de CI (`Aprovada`):**
-  - Inicialização de repositório **Git** com `.gitignore` padrão `.NET` / Visual Studio na Fase 1.
-  - Configuração posterior (Fase 6) de workflow no **GitHub Actions** com *service container* SQL Server (`mcr.microsoft.com/mssql/server`), executando `dotnet restore`, `dotnet build --no-restore` e `dotnet test` (unitários e integração com `ConnectionStrings__TestConnection` injetada pelo workflow).
+  - Instância **SQL Server Express em container Docker** já existente no ambiente local (`sqlserver-backend`, porta `1433`), criando bancos dedicados **`VKeeperDb`** (desenvolvimento) e **`VKeeperDb_Test`** (testes de integração locais), configurados em `appsettings.Development.json` (gitignored) e/ou User Secrets.
+- **Controle de versão e Workflow de CI/CD (`Aprovada`):**
+  - Repositório **Git** com `.gitignore` padrão `.NET` + exclusão de `appsettings.Development.json`.
+  - Configuração posterior (Fase 6) de workflow no **GitHub Actions** com *service container* SQL Server (`mcr.microsoft.com/mssql/server`), executando `dotnet restore`, `dotnet build --no-restore` e `dotnet test` (unitários e integração com `ConnectionStrings__TestConnection` injetada pelo workflow), e deploy automático de produção recebendo segredos e senhas exclusivamente via **GitHub Actions Secrets**.
 - **Publicação em nuvem (`Pendente`):**
   - Definição do provedor de hospedagem (ex.: Azure App Service + Azure SQL, container Docker em VPS/Render/Fly.io) postergada para após a conclusão e validação do MVP.
 
@@ -360,13 +361,15 @@ erDiagram
 | **ADR-08** | Validação em 3 níveis (Dominio + FluentValidation + DataAnnotations) | `Aprovada` |
 | **ADR-09** | Logging estruturado nativo com `ILogger<T>` | `Aprovada` |
 | **ADR-10** | Testes com xUnit (`TestesUnitarios` + `TestesIntegracao` com `WebApplicationFactory` e SQL Server via Env/User Secrets) | `Aprovada` |
-| **ADR-11** | SQL Server Express local via container Docker `sqlserver-backend` (`VanderkeepDb` / `VanderkeepDb_Test`) + *service container* SQL Server no workflow CI | `Aprovada` |
+| **ADR-11** | SQL Server Express local via container Docker `sqlserver-backend` (`VKeeperDb` / `VKeeperDb_Test`) + *service container* SQL Server no workflow CI | `Aprovada` |
 | **ADR-12** | Padronização dos documentos em português (`planejamento-de-produto.md`, `decisoes-tecnicas.md`, `progresso.md`) | `Aprovada` |
 | **ADR-13** | `Cascade` em `Note/Category -> NoteCategories` e `Restrict` em `AspNetUsers -> Notes/Categories` (anti Multiple Cascade Paths) | `Aprovada` |
 | **ADR-14** | Inicialização do Git na Fase 1 e workflow CI no GitHub Actions na Fase 6 | `Aprovada` |
 | **ADR-15** | Estratégia de hospedagem e deploy em nuvem pós-MVP | `Pendente` |
 | **ADR-16** | Projetos, pastas e namespaces de código autoral em português; pastas e arquivos convencionados pelo framework em inglês | `Aprovada` |
 | **ADR-17** | Inclusão de Lixeira (*soft delete*, restauração e exclusão permanente) no MVP com máquina de estados explícita (`IsDeleted`, `DeletedAtUtc`) | `Aprovada` |
+| **ADR-18** | Rebrand completo da marca e da solução de `VanderKeep` para `VKeeper` (`VKeeper.sln`, projetos/namespaces `VKeeper.*`, `VKeeperDbContext`, banco `VKeeperDb`) | `Aprovada` |
+| **ADR-19** | Connection string local de desenvolvimento em `appsettings.Development.json` (ignorado no `.gitignore` com `appsettings.Development.Example.json` versionado) e segredos de produção via GitHub Actions Secrets | `Aprovada` |
 
 ---
 
@@ -388,19 +391,19 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
 ### Fase 1 — Fundação da Solução e Infraestrutura Base *(Concluída)*
 - **Objetivo:** estruturar a solução Clean Architecture em `.NET 10` seguindo a convenção de pastas/namespaces aprovada, configurar projetos, dependências, DI base, logging, Git, User Secrets e ambiente de testes.
 - **Entregáveis:**
-  - `Vanderkeep.sln` e projetos `Vanderkeep.Dominio`, `Vanderkeep.Aplicacao`, `Vanderkeep.Infraestrutura`, `Vanderkeep.Web`, `Vanderkeep.TestesUnitarios` e `Vanderkeep.TestesIntegracao`.
+  - `VKeeper.sln` e projetos `VKeeper.Dominio`, `VKeeper.Aplicacao`, `VKeeper.Infraestrutura`, `VKeeper.Web`, `VKeeper.TestesUnitarios` e `VKeeper.TestesIntegracao`.
   - Referências entre projetos respeitando rigorosamente a direção da Clean Architecture.
   - Inicialização do Git + `.gitignore`, layout base Bootstrap 5 e páginas globais de erro (`404`, `403`, `500`).
-  - Configuração base de `VanderkeepDbContext`, inicialização de User Secrets em `Vanderkeep.Web` e `Vanderkeep.TestesIntegracao` e verificação de build + execução dos projetos de teste.
+  - Configuração base de `VKeeperDbContext`, inicialização de User Secrets em `VKeeper.Web` e `VKeeper.TestesIntegracao` e verificação de build + execução dos projetos de teste.
 - **Status:** Concluída e aprovada em revisão técnica independente (2026-11-26).
 
 ### Fase 2 — Domínio e Persistência Core (Notas, Categorias N:N e Soft Delete)
 - **Objetivo:** implementar o modelo de domínio completo (incluindo máquina de estados Ativa/Arquivada/Lixeira), mapeamentos Fluent API, repositórios, `UnitOfWork` e migrations iniciais.
 - **Entregáveis:**
   - Entidades `Note`, `Category`, `NoteCategory`, enum `NotePriority`, exceções de domínio e interfaces `INoteRepository`, `ICategoryRepository`, `IUnitOfWork`.
-  - `ApplicationUser : IdentityUser<Guid>`, `VanderkeepDbContext`, configurações Fluent API (`Configuracoes/`), índice único `(UserId, NormalizedTitle)`, índice composto de `Notes` com `IsDeleted` e estratégia anti-cascade-paths (`ADR-13`).
-  - Migration inicial aplicada ao banco `VanderkeepDb` no container `sqlserver-backend`.
-  - Testes unitários de domínio (`Vanderkeep.TestesUnitarios`) cobrindo todas as invariantes e transições de estado.
+  - `ApplicationUser : IdentityUser<Guid>`, `VKeeperDbContext`, configurações Fluent API (`Configuracoes/`), índice único `(UserId, NormalizedTitle)`, índice composto de `Notes` com `IsDeleted` e estratégia anti-cascade-paths (`ADR-13`).
+  - Migration inicial aplicada ao banco `VKeeperDb` no container `sqlserver-backend`.
+  - Testes unitários de domínio (`VKeeper.TestesUnitarios`) cobrindo todas as invariantes e transições de estado.
 - **Critério de conclusão:** migrations aplicadas com sucesso no SQL Server, testes unitários de domínio 100% aprovados e revisão concluída.
 
 ### Fase 3 — Autenticação, Contas e Segurança (ASP.NET Core Identity)
@@ -415,15 +418,15 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
 ### Fase 4 — Casos de Uso e MVC de Categorias
 - **Objetivo:** entregar o fluxo completo de gerenciamento de categorias pessoais.
 - **Entregáveis:**
-  - `CategoryService`, requests/DTOs e validadores FluentValidation sob `Vanderkeep.Aplicacao/Categorias/`.
+  - `CategoryService`, requests/DTOs e validadores FluentValidation sob `VKeeper.Aplicacao/Categorias/`.
   - `CategoriesController`, ViewModels e Razor Views em Bootstrap (Index com contagem de notas não excluídas, Create, Edit, confirmação de Delete com aviso de preservação das notas).
   - Testes unitários de `CategoryService` e testes de integração (unicidade por usuário, contagem ignorando lixeira e anti-IDOR).
 - **Critério de conclusão:** critérios de aceite de US11 e US12 validados por testes automatizados e revisados.
 
 ### Fase 5 — Casos de Uso e MVC de Notas e Lixeira (CRUD, N:N, Pin, Arquivar, Lixeira, Busca e Filtros)
-- **Objetivo:** entregar o núcleo funcional completo do Vanderkeep.
+- **Objetivo:** entregar o núcleo funcional completo do VKeeper.
 - **Entregáveis:**
-  - `NoteService`, queries, requests/DTOs e validadores FluentValidation sob `Vanderkeep.Aplicacao/Notas/`.
+  - `NoteService`, queries, requests/DTOs e validadores FluentValidation sob `VKeeper.Aplicacao/Notas/`.
   - `NotesController` e `TrashController`, ViewModels e Razor Views em Bootstrap (Notas Ativas, Arquivadas, Lixeira, Detalhes, Criar, Editar, confirmações de exclusão permanente e esvaziar lixeira).
   - Testes unitários de `NoteService` e testes de integração cobrindo N:N, exclusão de categoria preservando notas, filtros combinados, paginação (12 itens), Pin/Archive, Lixeira (mover, restaurar, excluir permanentemente, esvaziar) e testes anti-IDOR completos.
 - **Critério de conclusão:** critérios de aceite de US04 a US10 e US13 validados com testes unitários e de integração verdes.
