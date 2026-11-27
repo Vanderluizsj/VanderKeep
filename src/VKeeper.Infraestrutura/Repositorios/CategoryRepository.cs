@@ -20,6 +20,23 @@ public sealed class CategoryRepository : ICategoryRepository
             .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId, cancellationToken);
     }
 
+    public Task<CategorySummary?> GetSummaryByIdAsync(
+        Guid id,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return _dbContext.Categories
+            .AsNoTracking()
+            .Where(c => c.Id == id && c.UserId == userId)
+            .Select(c => new CategorySummary(
+                c.Id,
+                c.Title,
+                c.NoteCategories.Count(nc => !nc.Note.IsDeleted && nc.Note.UserId == userId),
+                c.CreatedAtUtc,
+                c.UpdatedAtUtc))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Category>> GetByIdsAsync(
         IEnumerable<Guid> ids,
         Guid userId,

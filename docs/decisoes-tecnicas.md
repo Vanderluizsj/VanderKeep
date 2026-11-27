@@ -415,13 +415,13 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
   - Testes de integração contra o banco SQL Server isolado `VKeeperDb_Test` cobrindo cadastro, login, logout, alteração de senha, senha fraca, lockout efetivo, redirecionamento anônimo, validação de `ReturnUrl` local e proteção contra Open Redirect (`https://` e `//`), CSRF e atributos `Set-Cookie`.
 - **Status:** Concluída, validada contra `VKeeperDb_Test` e aprovada em revisão de segurança independente (2026-11-27).
 
-### Fase 4 — Casos de Uso e MVC de Categorias
+### Fase 4 — Casos de Uso e MVC de Categorias *(Concluída)*
 - **Objetivo:** entregar o fluxo completo de gerenciamento de categorias pessoais.
 - **Entregáveis:**
-  - `CategoryService`, requests/DTOs e validadores FluentValidation sob `VKeeper.Aplicacao/Categorias/`.
-  - `CategoriesController`, ViewModels e Razor Views em Bootstrap (Index com contagem de notas não excluídas, Create, Edit, confirmação de Delete com aviso de preservação das notas).
-  - Testes unitários de `CategoryService` e testes de integração (unicidade por usuário, contagem ignorando lixeira e anti-IDOR).
-- **Critério de conclusão:** critérios de aceite de US11 e US12 validados por testes automatizados e revisados.
+  - `CategoryService`, requests/DTOs e validadores FluentValidation sob `VKeeper.Aplicacao/Categorias/` (`CriarCategoria`, `AtualizarCategoria`, `ListarCategorias`) + `GetSummaryByIdAsync` (`AsNoTracking`) no repositório.
+  - `CategoriesController`, ViewModels (`CategoryList`, `CreateCategory`, `EditCategory`, `DeleteCategory`) e Razor Views em Bootstrap 5 (`Index` com estado vazio e contagem de notas não excluídas, `Create`, `Edit`, `Delete` com aviso de preservação das notas) + link na navbar autenticada.
+  - Testes unitários de `CategoryService` (`14` casos) e testes de integração contra `VKeeperDb_Test` (`7` casos cobrindo acesso anônimo, CRUD alfabético, unicidade por usuário, contagem ignorando lixeira, exclusão preservando notas, CSRF e anti-IDOR).
+- **Status:** Concluída, validada contra `VKeeperDb_Test` (`100/100` testes) e aprovada na 1ª rodada em revisão independente (2026-11-27).
 
 ### Fase 5 — Casos de Uso e MVC de Notas e Lixeira (CRUD, N:N, Pin, Arquivar, Lixeira, Busca e Filtros)
 - **Objetivo:** entregar o núcleo funcional completo do VKeeper.

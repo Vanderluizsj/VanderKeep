@@ -18,10 +18,11 @@
                         var displayName = User.FindFirst(CustomClaimTypes.DisplayName)?.Value
                             ?? User.Identity.Name;
                         <p class="mb-4">
-                            Sessão ativa como <strong>@displayName</strong>. Os módulos de categorias, notas e lixeira serão habilitados nas próximas fases.
+                            Sessão ativa como <strong>@displayName</strong>. Gerencie suas categorias agora — os módulos de notas e lixeira chegam na próxima fase.
                         </p>
                         <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
+                            <a class="btn btn-primary px-4" asp-controller="Categories" asp-action="Index">Gerenciar categorias</a>
+                            <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
                         </div>
                     }
                     else

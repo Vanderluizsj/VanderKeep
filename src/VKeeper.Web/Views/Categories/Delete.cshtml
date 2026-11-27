@@ -1,0 +1,40 @@
+@model VKeeper.Web.ViewModels.Categories.DeleteCategoryViewModel
+@{
+    ViewData["Title"] = "Excluir categoria";
+}
+
+<section class="py-3">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card border-danger shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold text-danger mb-2">Excluir categoria</h1>
+                    <p class="mb-3">
+                        Tem certeza que deseja excluir a categoria <strong>@Model.Title</strong>?
+                    </p>
+
+                    <div class="alert alert-info small mb-4" role="note">
+                        @if (Model.NoteCount > 0)
+                        {
+                            <span>
+                                Esta categoria está vinculada a <strong>@Model.NoteCount @(Model.NoteCount == 1 ? "nota" : "notas")</strong>.
+                                Ao excluí-la, apenas o vínculo será removido — <strong>suas notas permanecerão intactas</strong>.
+                            </span>
+                        }
+                        else
+                        {
+                            <span>Esta categoria não possui notas ativas ou arquivadas vinculadas. Nenhuma nota será excluída.</span>
+                        }
+                    </div>
+
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger flex-grow-1">Confirmar exclusão</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

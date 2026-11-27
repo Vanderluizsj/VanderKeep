@@ -6,6 +6,11 @@ public interface ICategoryRepository
 {
     Task<Category?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken = default);
 
+    Task<CategorySummary?> GetSummaryByIdAsync(
+        Guid id,
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<Category>> GetByIdsAsync(
         IEnumerable<Guid> ids,
         Guid userId,

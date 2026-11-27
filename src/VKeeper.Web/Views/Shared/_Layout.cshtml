@@ -23,6 +23,12 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Início</a>
                         </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Categories" asp-action="Index">Categorias</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
                         @if (User.Identity?.IsAuthenticated == true)
