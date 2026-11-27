@@ -17,7 +17,13 @@ public static class DependencyInjection
         {
             var resolvedConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
             var connectionString = resolvedConfiguration.GetConnectionString("DefaultConnection") ?? string.Empty;
-            options.UseSqlServer(connectionString);
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null);
+            });
         });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();

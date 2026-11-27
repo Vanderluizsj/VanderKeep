@@ -105,6 +105,16 @@ dotnet test tests/VKeeper.TestesUnitarios/VKeeper.TestesUnitarios.csproj
 
 ---
 
+## CI/CD e Publicação (Azure)
+
+O pipeline em `.github/workflows/main_vkeeper.yml` automatiza integração contínua e entrega contínua no **Azure App Service** + **Azure SQL Database**:
+
+1. **`build-and-test` (PRs, `push` na `main` e manual):** sobe um *service container* SQL Server 2022, executa build `Release`, os testes unitários e de integração e, fora de PRs, gera os artefatos publicados (`dotnet publish`) e o bundle de migrations (`dotnet ef migrations bundle`).
+2. **`migrate` (`main` / manual):** aplica as migrations pendentes de forma controlada no Azure SQL usando o bundle validado e o secret `SQLSERVER_CONNECTIONSTRING`.
+3. **`deploy` (`main` / manual):** autentica na Azure via **OIDC (Federated Credentials)**, configura a connection string `DefaultConnection` (`SQLAzure`) no App Service e publica a aplicação com `azure/webapps-deploy@v3`.
+
+---
+
 ## Documentação oficial do projeto
 
 - [Planejamento de Produto](docs/planejamento-de-produto.md)

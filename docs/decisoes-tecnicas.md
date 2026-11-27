@@ -51,7 +51,7 @@
 | Validação | FluentValidation + DataAnnotations | FluentValidation na `Aplicacao`; DataAnnotations nos ViewModels (`Web`) | `Aprovada` |
 | Logging | `Microsoft.Extensions.Logging` | `ILogger<T>` nativo estruturado | `Aprovada` |
 | Testes Automatizados | xUnit | xUnit + `WebApplicationFactory<Program>` + SQL Server de testes | `Aprovada` |
-| CI (Integração Contínua) | GitHub Actions | Workflow futuro para build e execução de testes (incluindo SQL Server container) | `Aprovada` |
+| CI/CD | GitHub Actions | Pipeline `.github/workflows/main_vkeeper.yml` (build, testes com SQL Server container, `efbundle` no Azure SQL e deploy OIDC no Azure App Service) | `Aprovada` |
 
 ---
 
@@ -330,7 +330,7 @@ erDiagram
   - `appsettings.Development.Example.json`: template versionado no Git documentando a estrutura esperada de `ConnectionStrings:DefaultConnection` (sem senhas reais).
   - `appsettings.Development.json` (**ignorado no `.gitignore`**): armazena a `ConnectionStrings:DefaultConnection` local de desenvolvimento apontando para o SQL Server em Docker (`Server=localhost,1433;Database=VKeeperDb;...`), sem jamais ser versionado no GitHub.
   - **.NET User Secrets** (opcional em desenvolvimento e suportado em `VKeeper.TestesIntegracao` para `ConnectionStrings:TestConnection`).
-  - **Variáveis de ambiente / GitHub Actions Secrets** (`ConnectionStrings__DefaultConnection` e `ConnectionStrings__TestConnection`): padrão oficial para CI e deploy automático em produção.
+  - **Variáveis de ambiente / GitHub Actions Secrets:** `SQLSERVER_CONNECTIONSTRING` (secret de produção usado pelo `efbundle` e injetado no Azure App Service como `ConnectionStrings:DefaultConnection` / `SQLAzure`) e `ConnectionStrings__TestConnection` (variável de ambiente do job de testes de integração no CI).
 - **Migrations:** aplicadas explicitamente via `dotnet ef database update` durante o desenvolvimento (e automaticamente apenas no bootstrap do banco descartável de `VKeeper.TestesIntegracao`). Não executar `Database.Migrate()` automaticamente em produção sem estratégia controlada.
 
 ---
@@ -341,9 +341,12 @@ erDiagram
   - Instância **SQL Server Express em container Docker** já existente no ambiente local (`sqlserver-backend`, porta `1433`), criando bancos dedicados **`VKeeperDb`** (desenvolvimento) e **`VKeeperDb_Test`** (testes de integração locais), configurados em `appsettings.Development.json` (gitignored) e/ou User Secrets.
 - **Controle de versão e Workflow de CI/CD (`Aprovada`):**
   - Repositório **Git** com `.gitignore` padrão `.NET` + exclusão de `appsettings.Development.json`.
-  - Configuração posterior (Fase 6) de workflow no **GitHub Actions** com *service container* SQL Server (`mcr.microsoft.com/mssql/server`), executando `dotnet restore`, `dotnet build --no-restore` e `dotnet test` (unitários e integração com `ConnectionStrings__TestConnection` injetada pelo workflow), e deploy automático de produção recebendo segredos e senhas exclusivamente via **GitHub Actions Secrets**.
-- **Publicação em nuvem (`Pendente`):**
-  - Definição do provedor de hospedagem (ex.: Azure App Service + Azure SQL, container Docker em VPS/Render/Fly.io) postergada para após a conclusão e validação do MVP.
+  - Pipeline unificado de CI/CD em `.github/workflows/main_vkeeper.yml` (`ubuntu-latest`):
+    - **CI (`build-and-test` — PR, `push` na `main` e `workflow_dispatch`):** *service container* SQL Server 2022 Express (`mcr.microsoft.com/mssql/server:2022-latest`), executando `dotnet restore`, `dotnet build --no-restore --configuration Release`, testes unitários e testes de integração (`ConnectionStrings__TestConnection`). Em eventos fora de `pull_request`, gera também o artefato publicado (`dotnet publish`) e o executável idempotente de migrations (`dotnet ef migrations bundle`).
+    - **Migrations (`migrate` — somente `main` / manual):** executa o `efbundle` contra o Azure SQL usando o secret `SQLSERVER_CONNECTIONSTRING`, sem executar `Database.Migrate()` no startup da aplicação.
+    - **Deploy (`deploy` — somente `main` / manual):** autentica na Azure via **OIDC (Federated Credentials)** com `azure/login@v2`, configura `ConnectionStrings:DefaultConnection` no App Service (`SQLAzure`) via `az webapp config connection-string set --output none` e publica o artefato com `azure/webapps-deploy@v3`.
+- **Publicação em nuvem (`Aprovada` — ADR-15):**
+  - **Azure App Service** (Windows, plano gratuito F1, `.NET 10`, Autenticação básica desabilitada / OIDC) + **Azure SQL Database** (tier gratuito Serverless com *auto-pause*), com resiliência a falhas transitórias configurada via `EnableRetryOnFailure` em `DependencyInjection.cs` e segredos gerenciados exclusivamente por **GitHub Actions Secrets**.
 
 ---
 
@@ -365,7 +368,7 @@ erDiagram
 | **ADR-12** | Padronização dos documentos em português (`planejamento-de-produto.md`, `decisoes-tecnicas.md`, `progresso.md`) | `Aprovada` |
 | **ADR-13** | `Cascade` em `Note/Category -> NoteCategories` e `Restrict` em `AspNetUsers -> Notes/Categories` (anti Multiple Cascade Paths) | `Aprovada` |
 | **ADR-14** | Inicialização do Git na Fase 1 e workflow CI no GitHub Actions na Fase 6 | `Aprovada` |
-| **ADR-15** | Estratégia de hospedagem e deploy em nuvem pós-MVP | `Pendente` |
+| **ADR-15** | Hospedagem em Azure App Service (Windows, `.NET 10`) + Azure SQL Database com CI/CD no GitHub Actions (OIDC, EF Core Migration Bundle e `EnableRetryOnFailure`) | `Aprovada` |
 | **ADR-16** | Projetos, pastas e namespaces de código autoral em português; pastas e arquivos convencionados pelo framework em inglês | `Aprovada` |
 | **ADR-17** | Inclusão de Lixeira (*soft delete*, restauração e exclusão permanente) no MVP com máquina de estados explícita (`IsDeleted`, `DeletedAtUtc`) | `Aprovada` |
 | **ADR-18** | Rebrand completo da marca e da solução de `VanderKeep` para `VKeeper` (`VKeeper.sln`, projetos/namespaces `VKeeper.*`, `VKeeperDbContext`, banco `VKeeperDb`) | `Aprovada` |
@@ -375,7 +378,7 @@ erDiagram
 
 ## 14. Decisões pendentes e alertas de governança
 
-1. **Hospedagem e deploy em nuvem (ADR-15):** definir após a conclusão do MVP.
+Nenhuma decisão arquitetural crítica pendente para o MVP e publicação inicial em nuvem. Próxima evolução prevista: rodada de ajustes de UX pós-testes manuais e eventuais melhorias pós-MVP.
 
 ---
 

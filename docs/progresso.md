@@ -8,7 +8,7 @@
 
 - **Status do MVP:** **Todas as fases do MVP (Fases 0 a 6) concluídas e aprovadas em auditoria técnica independente!**
 - **Build e Testes (Release):** **0 avisos, 0 erros** — **128/128 testes aprovados** (`72` unitários + `56` de integração contra SQL Server real `VKeeperDb_Test`).
-- **Repositório remoto:** `origin` configurado em `https://github.com/Vanderluizsj/VanderKeep.git` (Fases 0 a 5 publicadas; Fase 6 pronta para push e validação da primeira execução do workflow CI no GitHub Actions).
+- **Repositório remoto:** `origin` configurado em `https://github.com/Vanderluizsj/VanderKeep.git` com pipeline unificado CI/CD em `.github/workflows/main_vkeeper.yml` (Azure App Service `vkeeper` + Azure SQL via OIDC e EF Core Migration Bundle — `ADR-15` aprovada).
 
 ---
 
@@ -41,9 +41,9 @@
 - **Polimento visual e acessibilidade:**
   - Remoção de `<script type="importmap"></script>` vazio e de atributos `style="..."` inline (substituídos por `.note-description`, `.note-card`, `.note-card-actions` em `wwwroot/css/site.css`).
   - Adição de `aria-current="page"` nos links ativos da navbar e da paginação.
-- **CI e Documentação de portfólio:**
-  - Workflow CI `.github/workflows/ci.yml` com *service container* SQL Server 2022 Express, `permissions: contents: read`, `cancel-in-progress` restrito a PRs, restore, build Release, testes unitários e testes de integração via `ConnectionStrings__TestConnection`.
-  - `README.md` completo na raiz do repositório com visão do produto, arquitetura, segurança, instruções de setup local e testes.
+- **CI/CD e Documentação de portfólio:**
+  - Workflow inicial `.github/workflows/ci.yml` evoluído e consolidado em `.github/workflows/main_vkeeper.yml` (CI com *service container* SQL Server 2022 Express + CD para Azure App Service `vkeeper` e Azure SQL via OIDC e `efbundle`, com `EnableRetryOnFailure` validado em `128/128` testes em Release).
+  - `README.md` completo na raiz do repositório com visão do produto, arquitetura, segurança, instruções de setup local, testes e CI/CD Azure.
 
 ---
 
@@ -70,6 +70,5 @@
 
 ## Pendências conhecidas (pós-MVP)
 
-1. **Validação da 1ª execução do workflow CI no GitHub Actions:** acompanhar a execução verde de `.github/workflows/ci.yml` após o `git push` da Fase 6.
-2. **Rodada de ajustes de UX com o solicitante:** conforme sinalizado pelo solicitante, ajustes visuais/UX pós-testes manuais serão coletados após a conclusão da Fase 6.
-3. **Hospedagem e deploy em nuvem (`ADR-15`):** decisão adiada deliberadamente para pós-MVP (com segredos via GitHub Actions Secrets conforme `ADR-19`).
+1. **Validação da 1ª execução do pipeline CI/CD no GitHub Actions:** acompanhar a execução verde de `.github/workflows/main_vkeeper.yml` (testes, `efbundle` no Azure SQL e deploy no Azure App Service `vkeeper`) após o `git push`.
+2. **Rodada de ajustes de UX com o solicitante:** conforme sinalizado pelo solicitante, ajustes visuais/UX pós-testes manuais serão coletados após a publicação inicial.
