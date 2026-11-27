@@ -4,6 +4,7 @@ using VKeeper.Aplicacao.Categorias.CriarCategoria;
 using VKeeper.Aplicacao.Categorias.ListarCategorias;
 using VKeeper.Aplicacao.Comum;
 using VKeeper.Dominio.Entidades;
+using VKeeper.Dominio.Excecoes;
 using VKeeper.Dominio.Interfaces;
 
 namespace VKeeper.Aplicacao.Categorias;
@@ -98,7 +99,15 @@ public sealed class CategoryService : ICategoryService
 
         var category = new Category(userId, request.Title, _dateTimeProvider.UtcNow);
         await _categoryRepository.AddAsync(category, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (UniqueConstraintViolationException)
+        {
+            return Result<Guid>.Conflict(DuplicateCategoryMessage);
+        }
 
         return Result<Guid>.Success(category.Id);
     }
@@ -110,6 +119,11 @@ public sealed class CategoryService : ICategoryService
         if (!TryGetUserId(out var userId))
         {
             return Result.Forbidden(UnauthenticatedMessage);
+        }
+
+        if (request.Id == Guid.Empty)
+        {
+            return Result.NotFound(CategoryNotFoundMessage);
         }
 
         var validation = await _updateValidator.ValidateAsync(request, cancellationToken);
@@ -137,7 +151,15 @@ public sealed class CategoryService : ICategoryService
         }
 
         category.Rename(request.Title, _dateTimeProvider.UtcNow);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (UniqueConstraintViolationException)
+        {
+            return Result.Conflict(DuplicateCategoryMessage);
+        }
 
         return Result.Success();
     }

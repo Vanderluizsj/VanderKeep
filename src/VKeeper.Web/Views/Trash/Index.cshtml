@@ -100,8 +100,12 @@
                     }
                     @for (var p = 1; p <= Model.Notes.TotalPages; p++)
                     {
-                        <li class="page-item @(p == Model.Notes.PageNumber ? "active" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@p">@p</a>
+                        var isCurrentPage = p == Model.Notes.PageNumber;
+                        <li class="page-item @(isCurrentPage ? "active" : "")">
+                            <a class="page-link"
+                               aria-current="@(isCurrentPage ? "page" : null)"
+                               asp-action="Index"
+                               asp-route-page="@p">@p</a>
                         </li>
                     }
                     @if (Model.Notes.HasNextPage)

@@ -431,11 +431,11 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
   - Testes unitários de `NoteService` (`8` casos) e testes de integração contra `VKeeperDb_Test` (`15` casos cobrindo N:N, `RN03` em `Create`/`Edit`, filtros combinados, ordenação, paginação de 12 itens com clamp de página, Pin/Archive, Lixeira completa, anti-Open Redirect, CSRF e anti-IDOR completo).
 - **Status:** Concluída, validada contra `VKeeperDb_Test` (`123/123` testes) e aprovada em revisão técnica e de segurança independente (2026-11-27).
 
-### Fase 6 — Polimento de UX, Hardening, Workflow CI e Fechamento do MVP
+### Fase 6 — Polimento de UX, Hardening, Workflow CI e Fechamento do MVP *(Concluída)*
 - **Objetivo:** finalizar acabamentos de interface, revisar segurança/desempenho, configurar o workflow no GitHub Actions e consolidar documentação final.
 - **Entregáveis:**
-  - Revisão visual e responsiva (estados vazios, alertas `TempData`, acessibilidade básica, badges de prioridade/categorias e navegação Ativas/Arquivadas/Lixeira).
-  - Revisão final de consultas SQL/índices, headers de segurança e logging.
-  - Workflow CI em `.github/workflows/` com *service container* SQL Server executando build e testes unitários + integração automaticamente, além de `README.md` com guia de setup local.
-  - Auditoria técnica final do Reviewer e atualização completa de `docs/progresso.md`.
-- **Critério de conclusão:** MVP completo, auditado, com CI verde e pronto para demonstração em portfólio (e eventual fase futura de publicação em nuvem).
+  - Hardening de segurança: `SecurityHeadersMiddleware` (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Content-Security-Policy`), tratamento de concorrência TOCTOU no índice único de categorias (`UniqueConstraintViolationException` + `UnitOfWork` + `CategoryService`), uniformização de `Guid.Empty` (`404`) em `CategoriesController`/`CategoryService` e prevenção de double-submit compatível com *bfcache* (`wwwroot/js/site.js`).
+  - Polimento de interface e acessibilidade: remoção de estilos/scripts inline nas views, hover suave em `.note-card` e `aria-current="page"` em navegação e paginação.
+  - Workflow CI em `.github/workflows/ci.yml` com *service container* SQL Server 2022 Express executando restore, build Release, testes unitários e integração (`ConnectionStrings__TestConnection`) e `README.md` de portfólio.
+  - Auditoria técnica final independente aprovada pelo Reviewer (`128/128` testes em Release) e `docs/progresso.md` atualizado.
+- **Status:** Concluída e aprovada em auditoria independente final (2026-11-27). *(Confirmação da execução do workflow CI ocorrerá no próximo push para o GitHub.)*

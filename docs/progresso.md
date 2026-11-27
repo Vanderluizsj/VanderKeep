@@ -6,8 +6,9 @@
 
 ## Status geral
 
-- **Fase atual:** Fase 5 concluída e aprovada em revisão independente — todo o núcleo funcional do MVP está pronto! Próxima etapa: **Fase 6 (Polimento de UX, Hardening, Workflow CI no GitHub Actions e Fechamento do MVP)**.
-- **Repositório remoto:** `origin` configurado em `https://github.com/Vanderluizsj/VanderKeep.git` (Fases 0 a 4 publicadas; Fase 5 pronta para push).
+- **Status do MVP:** **Todas as fases do MVP (Fases 0 a 6) concluídas e aprovadas em auditoria técnica independente!**
+- **Build e Testes (Release):** **0 avisos, 0 erros** — **128/128 testes aprovados** (`72` unitários + `56` de integração contra SQL Server real `VKeeperDb_Test`).
+- **Repositório remoto:** `origin` configurado em `https://github.com/Vanderluizsj/VanderKeep.git` (Fases 0 a 5 publicadas; Fase 6 pronta para push e validação da primeira execução do workflow CI no GitHub Actions).
 
 ---
 
@@ -29,52 +30,46 @@
 - `CategoryService`, FluentValidation, `CategoriesController` e views MVC em Bootstrap 5 (`Index`, `Create`, `Edit`, `Delete` com preservação das notas), cobertura unitária e testes de integração anti-IDOR contra `VKeeperDb_Test`.
 
 ### Fase 5 — Casos de Uso e MVC de Notas e Lixeira (Concluída em 2026-11-27)
-- **Aplicação (`VKeeper.Aplicacao/Notas/`):** `INoteService`, `NoteService`, feature folders (`CriarNota`, `AtualizarNota`, `ListarNotas`, `ObterNota`, `Lixeira`), validação de ownership N:N (`RN03`), máquina de estados Ativa/Arquivada/Lixeira (`RN07`) e normalização de página efetiva (`page > TotalPages`) em `NoteRepository` e `NoteService`.
-- **Web (`VKeeper.Web`):** `NotesController`, `TrashController`, `NotePriorityDisplay`, ViewModels dedicados com `[EnumDataType]`, Razor Views Bootstrap 5 em `pt-BR` (`_NotesList`, `Index`, `Archived`, `Details`, `Create`, `Edit`, `Trash/Index`, `Trash/Delete` com metadados, `Trash/Empty`, paginação acessível com `<span aria-disabled="true">`), redirecionamento autenticado direto para `/Notes` em `HomeController` e `AccountController`, landing clara para visitantes (**"Entrar"** / **"Criar minha conta"**) e navbar completa (**Notas**, **Arquivadas**, **Lixeira**, **Categorias**).
+- `NoteService`, `NotesController`, `TrashController`, relacionamento N:N com validação de propriedade (`RN03`), Pin, Arquivamento, Lixeira (mover, restaurar, excluir permanentemente, esvaziar), busca textual, filtros combinados, ordenação, paginação de 12 itens com clamp de página fora do limite, redirecionamento autenticado direto para `/Notes` e cobertura completa unitária + integração anti-IDOR.
+
+### Fase 6 — Polimento de UX, Hardening, Workflow CI e Fechamento do MVP (Concluída em 2026-11-27)
+- **Hardening de segurança e robustez:**
+  - `SecurityHeadersMiddleware` adicionando `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` e `Content-Security-Policy`.
+  - Tratamento de concorrência TOCTOU no índice único `UX_Categories_UserId_NormalizedTitle`: `UniqueConstraintViolationException` (em `VKeeper.Dominio`), tradução de `SqlException` (`2601`/`2627`) em `UnitOfWork`, tratamento para `Result.Conflict` em `CategoryService` e validação real contra SQL Server em `CategoriesIntegrationTests`.
+  - Uniformização de `id == Guid.Empty` (`404 NotFound`) em `CategoriesController` e `CategoryService`.
+  - Prevenção progressiva de double-submit em `wwwroot/js/site.js` com guarda `event.defaultPrevented`, controle de reentrada e restauração compatível com *bfcache* (`pageshow`).
+- **Polimento visual e acessibilidade:**
+  - Remoção de `<script type="importmap"></script>` vazio e de atributos `style="..."` inline (substituídos por `.note-description`, `.note-card`, `.note-card-actions` em `wwwroot/css/site.css`).
+  - Adição de `aria-current="page"` nos links ativos da navbar e da paginação.
+- **CI e Documentação de portfólio:**
+  - Workflow CI `.github/workflows/ci.yml` com *service container* SQL Server 2022 Express, `permissions: contents: read`, `cancel-in-progress` restrito a PRs, restore, build Release, testes unitários e testes de integração via `ConnectionStrings__TestConnection`.
+  - `README.md` completo na raiz do repositório com visão do produto, arquitetura, segurança, instruções de setup local e testes.
 
 ---
 
 ## Testes executados
 
-### Fase 5 (2026-11-27)
-- `dotnet build VKeeper.sln --no-restore`: **Êxito (0 avisos, 0 erros)**.
-- `VKeeper.TestesUnitarios`: **68/68 aprovados** (incluindo `NoteServiceTests`).
-- `VKeeper.TestesIntegracao`: **55/55 aprovados** contra o banco real **`VKeeperDb_Test`** (incluindo `NotesAndTrashIntegrationTests` cobrindo acesso anônimo, redirecionamento autenticado `/` -> `/Notes`, CRUD + N:N com 0 e múltiplas categorias, `RN03` em `Create` e `Edit`, Pin/Arquivar/Desarquivar, busca textual + filtros combinados + ordenação + paginação de 12 itens com clamp de página fora do limite, ciclo completo da Lixeira, proteção contra Open Redirect em `NotesController`, CSRF e anti-IDOR completo entre Usuário A e Usuário B).
-- **Total consolidado:** **123/123 testes aprovados**.
+### Validação final do MVP — Fase 6 (2026-11-27)
+- `dotnet build VKeeper.sln --no-restore --configuration Release`: **Êxito (0 avisos, 0 erros)**.
+- `VKeeper.TestesUnitarios`: **72/72 aprovados** (`298 ms`) — `BaseEntityTests`, `ResultTests`, `PagedResultTests`, `CategoryTests`, `NoteCategoryTests`, `NoteTests`, `CategoryServiceTests` (incluindo fronteira de 50 chars, `Guid.Empty`, títulos inválidos e `UniqueConstraintViolationException`) e `NoteServiceTests`.
+- `VKeeper.TestesIntegracao`: **56/56 aprovados** contra o SQL Server real **`VKeeperDb_Test`** — `SmokeTests` (incluindo headers HTTP/CSP), `IdentityErrorTranslatorTests`, `CurrentUserServiceTests`, `AccountIntegrationTests`, `CategoriesIntegrationTests` (incluindo tradução real de `SqlException 2601/2627` em `UnitOfWork`, conflito em `Edit`, `Guid.Empty`, estado vazio e anti-IDOR) e `NotesAndTrashIntegrationTests`.
+- **Total consolidado:** **128/128 testes aprovados**.
 
 ---
 
 ## Revisões realizadas
 
-### Fase 1 (2026-11-26)
-- Rodada 1: Reprovado -> Rodada 2: **Aprovado**.
-
-### Fase 2 (2026-11-27)
-- **Aprovado com ressalvas** -> refinamentos aplicados e migration `InitialCreate` aplicada em `VKeeperDb`.
-
-### Fase 3 (2026-11-27)
-- Rodada 1: Aprovado com ressalvas -> Rodada 2: **Aprovado**.
-
-### Fase 4 (2026-11-27)
-- Rodada 1: **Aprovado**.
-
-### Fase 5 — Auditoria independente pelo Reviewer (2026-11-27)
-- **Rodada 1:** Aprovado com ressalvas (0 Críticos, 0 Altos, 2 Médios: clamp de paginação `page > TotalPages` em Notas/Lixeira e ampliação de cobertura em `NotesAndTrashIntegrationTests` para `POST Edit` RN03/IDOR, `Unpin`/`Unarchive` IDOR e Open Redirect em `NotesController`; 2 Baixos: metadados em `Trash/Delete.cshtml`, `[EnumDataType]` nos ViewModels e acessibilidade da paginação).
-- **Rodada 2 (pós-correções):** **Aprovado** — todos os apontamentos resolvidos sem achados remanescentes.
+- **Fase 1 (2026-11-26):** Rodada 1 Reprovado -> Rodada 2 **Aprovado**.
+- **Fase 2 (2026-11-27):** Aprovado com ressalvas -> refinamentos + migration `InitialCreate` aplicada em `VKeeperDb`.
+- **Fase 3 (2026-11-27):** Rodada 1 Aprovado com ressalvas -> Rodada 2 **Aprovado**.
+- **Fase 4 (2026-11-27):** Rodada 1 **Aprovado**.
+- **Fase 5 (2026-11-27):** Rodada 1 Aprovado com ressalvas -> Rodada 2 **Aprovado**.
+- **Fase 6 (2026-11-27):** Rodada 1 Aprovado com ressalvas (2 Médios: `bfcache`/reentrada em `site.js` e teste real de `UnitOfWork` contra SQL Server; 2 Baixos: `cancel-in-progress` no `ci.yml` e `aria-current="page"`) -> Rodada 2 **Aprovado** com zero achados remanescentes.
 
 ---
 
-## Pendências conhecidas
+## Pendências conhecidas (pós-MVP)
 
-1. **Itens da Fase 6 (Polimento de UX, Hardening e Workflow CI):**
-   - Revisão de headers de segurança HTTP (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, etc.), uniformização de `id == Guid.Empty` em `POST /Categories/Edit`, tratamento opcional de concorrência TOCTOU em índice único de categorias.
-   - Workflow CI em `.github/workflows/` com *service container* SQL Server executando build e todos os 123+ testes automaticamente.
-   - `README.md` profissional de portfólio com visão arquitetural, screenshots/instruções de setup local e execução de testes.
-2. **Hospedagem e deploy em nuvem (`ADR-15`):** decisão adiada deliberadamente para pós-MVP.
-
----
-
-## Próximas atividades
-
-1. Publicar o commit da Fase 5 no GitHub (`git push origin main`).
-2. Iniciar a **Fase 6 — Polimento de UX, Hardening, Workflow CI e Fechamento do MVP**.
+1. **Validação da 1ª execução do workflow CI no GitHub Actions:** acompanhar a execução verde de `.github/workflows/ci.yml` após o `git push` da Fase 6.
+2. **Rodada de ajustes de UX com o solicitante:** conforme sinalizado pelo solicitante, ajustes visuais/UX pós-testes manuais serão coletados após a conclusão da Fase 6.
+3. **Hospedagem e deploy em nuvem (`ADR-15`):** decisão adiada deliberadamente para pós-MVP (com segredos via GitHub Actions Secrets conforme `ADR-19`).

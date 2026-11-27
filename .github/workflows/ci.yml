@@ -1,0 +1,62 @@
+name: CI — Build e Testes (VKeeper)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build, Testes Unitários e Integração (SQL Server)
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "true"
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: "Express"
+          MSSQL_SA_PASSWORD: "VKeeper_Ci_Temp123!"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P VKeeper_Ci_Temp123! -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P VKeeper_Ci_Temp123! -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 15s
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restaurar dependências
+        run: dotnet restore VKeeper.sln
+
+      - name: Compilar solução (Release)
+        run: dotnet build VKeeper.sln --no-restore --configuration Release
+
+      - name: Executar testes unitários
+        run: dotnet test tests/VKeeper.TestesUnitarios/VKeeper.TestesUnitarios.csproj --no-build --configuration Release --verbosity normal
+
+      - name: Executar testes de integração (SQL Server)
+        env:
+          ConnectionStrings__TestConnection: "Server=localhost,1433;Database=VKeeperDb_Test;User Id=sa;Password=VKeeper_Ci_Temp123!;TrustServerCertificate=True;"
+        run: dotnet test tests/VKeeper.TestesIntegracao/VKeeper.TestesIntegracao.csproj --no-build --configuration Release --verbosity normal

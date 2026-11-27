@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using VKeeper.Dominio.Entidades;
 using VKeeper.Dominio.Enums;
+using VKeeper.Dominio.Excecoes;
+using VKeeper.Dominio.Interfaces;
 using VKeeper.Infraestrutura.Identity;
 using VKeeper.Infraestrutura.Persistencia;
 using VKeeper.TestesIntegracao.Infraestrutura;
@@ -40,6 +42,10 @@ public sealed class CategoriesIntegrationTests
         using var client = CreateClientNoRedirect();
         var (userId, _) = await RegisterAndSignInAsync(client);
 
+        // Initially empty state must be displayed cleanly.
+        var emptyIndexHtml = await client.GetStringAsync("/Categories");
+        Assert.Contains("Nenhuma categoria cadastrada", emptyIndexHtml);
+
         // Create two categories out of alphabetical order.
         var createZ = await CreateCategoryAsync(client, "Zeta");
         var createA = await CreateCategoryAsync(client, "Alfa");
@@ -47,6 +53,7 @@ public sealed class CategoriesIntegrationTests
         Assert.Equal(HttpStatusCode.Redirect, createA.StatusCode);
 
         var indexHtml = await client.GetStringAsync("/Categories");
+        Assert.Contains("Categoria criada com sucesso.", indexHtml);
         var indexAlfa = indexHtml.IndexOf("Alfa", StringComparison.Ordinal);
         var indexZeta = indexHtml.IndexOf("Zeta", StringComparison.Ordinal);
         Assert.True(indexAlfa >= 0 && indexZeta > indexAlfa, "Categories should be listed in alphabetical order.");
@@ -64,6 +71,12 @@ public sealed class CategoriesIntegrationTests
         // Rename Alfa -> Beta (and also verify case-only rename on Beta -> BETA).
         var editResponse = await EditCategoryAsync(client, alfaId, "Beta");
         Assert.Equal(HttpStatusCode.Redirect, editResponse.StatusCode);
+
+        // Attempting to rename Beta to existing Zeta must return conflict on Edit page.
+        var duplicateEditResponse = await EditCategoryAsync(client, alfaId, "  zeta  ");
+        var duplicateEditHtml = await duplicateEditResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.OK, duplicateEditResponse.StatusCode);
+        Assert.Contains("Já existe uma categoria cadastrada com este título.", duplicateEditHtml);
 
         var caseRenameResponse = await EditCategoryAsync(client, alfaId, "BETA");
         Assert.Equal(HttpStatusCode.Redirect, caseRenameResponse.StatusCode);
@@ -193,9 +206,23 @@ public sealed class CategoriesIntegrationTests
         using var clientB = CreateClientNoRedirect();
         await RegisterAndSignInAsync(clientB);
 
+        // User B listing /Categories must never see User A's category.
+        var listBHtml = await clientB.GetStringAsync("/Categories");
+        Assert.DoesNotContain("Segredo de A", listBHtml);
+
         // Obtain a valid antiforgery token from B's own Create page to test POST IDOR directly.
         var createPageHtml = await clientB.GetStringAsync("/Categories/Create");
         var tokenB = AntiForgeryHelper.ExtractRequestVerificationToken(createPageHtml);
+
+        // Guid.Empty on POST Edit must consistently return 404.
+        using var emptyIdForm = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = tokenB,
+            ["Id"] = Guid.Empty.ToString(),
+            ["Title"] = "Invalida"
+        });
+        var postEditEmptyId = await clientB.PostAsync($"/Categories/Edit/{Guid.Empty}", emptyIdForm);
+        Assert.Equal(HttpStatusCode.NotFound, postEditEmptyId.StatusCode);
 
         var getEdit = await clientB.GetAsync($"/Categories/Edit/{categoryAId}");
         Assert.Equal(HttpStatusCode.NotFound, getEdit.StatusCode);
@@ -226,6 +253,30 @@ public sealed class CategoriesIntegrationTests
             var categoryA = await db.Categories.SingleOrDefaultAsync(c => c.Id == categoryAId);
             Assert.NotNull(categoryA);
             Assert.Equal("Segredo de A", categoryA.Title);
+        }
+    }
+
+    [Fact]
+    public async Task UnitOfWork_WhenSavingDuplicateNormalizedCategoryTitleInSqlServer_ShouldThrowUniqueConstraintViolationException()
+    {
+        using var client = CreateClientNoRedirect();
+        var (userId, _) = await RegisterAndSignInAsync(client);
+
+        using (var firstScope = _factory.Services.CreateScope())
+        {
+            var repo = firstScope.ServiceProvider.GetRequiredService<ICategoryRepository>();
+            var uow = firstScope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            await repo.AddAsync(new Category(userId, "Duplicada Real", DateTime.UtcNow));
+            await uow.SaveChangesAsync();
+        }
+
+        using (var secondScope = _factory.Services.CreateScope())
+        {
+            var repo = secondScope.ServiceProvider.GetRequiredService<ICategoryRepository>();
+            var uow = secondScope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            await repo.AddAsync(new Category(userId, "  DUPLICADA REAL  ", DateTime.UtcNow));
+
+            await Assert.ThrowsAsync<UniqueConstraintViolationException>(() => uow.SaveChangesAsync());
         }
     }
 

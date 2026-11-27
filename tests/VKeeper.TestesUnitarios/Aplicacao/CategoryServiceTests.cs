@@ -3,6 +3,7 @@ using VKeeper.Aplicacao.Categorias.AtualizarCategoria;
 using VKeeper.Aplicacao.Categorias.CriarCategoria;
 using VKeeper.Aplicacao.Comum;
 using VKeeper.Dominio.Entidades;
+using VKeeper.Dominio.Excecoes;
 using VKeeper.Dominio.Interfaces;
 
 namespace VKeeper.TestesUnitarios.Aplicacao;
@@ -166,6 +167,55 @@ public sealed class CategoryServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_WithExact50CharsAfterTrim_ShouldSucceed()
+    {
+        var userId = Guid.CreateVersion7();
+        var (service, _, uow) = CreateSut(userId);
+        var boundaryTitle = "  " + new string('a', Category.MaxTitleLength) + "  ";
+
+        var result = await service.CreateAsync(new CreateCategoryRequest(boundaryTitle));
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(1, uow.SaveCalls);
+    }
+
+    [Fact]
+    public async Task CreateOrUpdateAsync_WhenUniqueConstraintViolationOccursOnSave_ShouldReturnConflict()
+    {
+        var userId = Guid.CreateVersion7();
+        var (service, repo, uow) = CreateSut(userId);
+        uow.ThrowUniqueViolation = true;
+
+        var createResult = await service.CreateAsync(new CreateCategoryRequest("Concorrente"));
+        Assert.Equal(ErrorType.Conflict, createResult.ErrorType);
+
+        var existing = new Category(userId, "Original", FixedUtcNow);
+        repo.Categories.Add(existing);
+        var updateResult = await service.UpdateAsync(new UpdateCategoryRequest(existing.Id, "Renomeada"));
+        Assert.Equal(ErrorType.Conflict, updateResult.ErrorType);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task UpdateAsync_WithInvalidTitleOrEmptyId_ShouldFailWithoutSaving(string invalidTitle)
+    {
+        var userId = Guid.CreateVersion7();
+        var (service, repo, uow) = CreateSut(userId);
+        var category = new Category(userId, "Original", FixedUtcNow);
+        repo.Categories.Add(category);
+
+        var blankResult = await service.UpdateAsync(new UpdateCategoryRequest(category.Id, invalidTitle));
+        var tooLongResult = await service.UpdateAsync(new UpdateCategoryRequest(category.Id, new string('z', Category.MaxTitleLength + 1)));
+        var emptyIdResult = await service.UpdateAsync(new UpdateCategoryRequest(Guid.Empty, "Válida"));
+
+        Assert.Equal(ErrorType.Validation, blankResult.ErrorType);
+        Assert.Equal(ErrorType.Validation, tooLongResult.ErrorType);
+        Assert.Equal(ErrorType.NotFound, emptyIdResult.ErrorType);
+        Assert.Equal(0, uow.SaveCalls);
+    }
+
+    [Fact]
     public async Task DeleteAsync_WhenOwnedByUser_ShouldRemoveAndSave()
     {
         var userId = Guid.CreateVersion7();
@@ -253,8 +303,15 @@ public sealed class CategoryServiceTests
     {
         public int SaveCalls { get; private set; }
 
+        public bool ThrowUniqueViolation { get; set; }
+
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            if (ThrowUniqueViolation)
+            {
+                throw new UniqueConstraintViolationException("Duplicate key.", new InvalidOperationException());
+            }
+
             SaveCalls++;
             return Task.FromResult(1);
         }

@@ -22,13 +22,18 @@ public sealed class SmokeTests
     }
 
     [Fact]
-    public async Task GetHome_ShouldReturnSuccessAndBrandTitle()
+    public async Task GetHome_ShouldReturnSuccessBrandTitleAndSecurityHeaders()
     {
         var response = await _client.GetAsync("/");
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("VKeeper", content);
+        Assert.Equal("nosniff", response.Headers.GetValues("X-Content-Type-Options").Single());
+        Assert.Equal("DENY", response.Headers.GetValues("X-Frame-Options").Single());
+        Assert.Equal("strict-origin-when-cross-origin", response.Headers.GetValues("Referrer-Policy").Single());
+        Assert.True(response.Headers.Contains("Permissions-Policy"));
+        Assert.Contains("default-src 'self'", response.Headers.GetValues("Content-Security-Policy").Single());
     }
 
     [Fact]

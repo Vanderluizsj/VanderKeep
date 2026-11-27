@@ -9,7 +9,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - VKeeper</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -26,27 +25,38 @@
                     <ul class="navbar-nav me-auto">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            var isNotesActive = currentController == "Notes" && currentAction != "Archived";
+                            var isArchivedActive = currentController == "Notes" && currentAction == "Archived";
+                            var isTrashActive = currentController == "Trash";
+                            var isCategoriesActive = currentController == "Categories";
+
                             <li class="nav-item">
-                                <a class="nav-link @(currentController == "Notes" && currentAction != "Archived" ? "active" : "")"
+                                <a class="nav-link @(isNotesActive ? "active" : "")"
+                                   aria-current="@(isNotesActive ? "page" : null)"
                                    asp-controller="Notes" asp-action="Index">Notas</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @(currentController == "Notes" && currentAction == "Archived" ? "active" : "")"
+                                <a class="nav-link @(isArchivedActive ? "active" : "")"
+                                   aria-current="@(isArchivedActive ? "page" : null)"
                                    asp-controller="Notes" asp-action="Archived">Arquivadas</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @(currentController == "Trash" ? "active" : "")"
+                                <a class="nav-link @(isTrashActive ? "active" : "")"
+                                   aria-current="@(isTrashActive ? "page" : null)"
                                    asp-controller="Trash" asp-action="Index">Lixeira</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @(currentController == "Categories" ? "active" : "")"
+                                <a class="nav-link @(isCategoriesActive ? "active" : "")"
+                                   aria-current="@(isCategoriesActive ? "page" : null)"
                                    asp-controller="Categories" asp-action="Index">Categorias</a>
                             </li>
                         }
                         else
                         {
+                            var isHomeActive = currentController == "Home";
                             <li class="nav-item">
-                                <a class="nav-link @(currentController == "Home" ? "active" : "")"
+                                <a class="nav-link @(isHomeActive ? "active" : "")"
+                                   aria-current="@(isHomeActive ? "page" : null)"
                                    asp-controller="Home" asp-action="Index">Início</a>
                             </li>
                         }
@@ -54,6 +64,7 @@
                     <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            var isChangePasswordActive = currentController == "Account" && currentAction == "ChangePassword";
                             var displayName = User.FindFirst(CustomClaimTypes.DisplayName)?.Value
                                 ?? User.Identity.Name
                                 ?? "Conta";
@@ -61,7 +72,8 @@
                                 <span class="navbar-text text-light small me-md-2">Olá, <strong>@displayName</strong></span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @(currentController == "Account" && currentAction == "ChangePassword" ? "active" : "")"
+                                <a class="nav-link @(isChangePasswordActive ? "active" : "")"
+                                   aria-current="@(isChangePasswordActive ? "page" : null)"
                                    asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
                             </li>
                             <li class="nav-item">

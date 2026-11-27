@@ -29,3 +29,20 @@ html {
   margin-bottom: 0;
   padding-left: 1.25rem;
 }
+
+.note-card {
+  transition: transform 0.12s ease-in-out, box-shadow 0.12s ease-in-out;
+}
+
+.note-card:hover {
+  transform: translateY(-2px);
+}
+
+.note-card-actions {
+  z-index: 2;
+}
+
+.note-description {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

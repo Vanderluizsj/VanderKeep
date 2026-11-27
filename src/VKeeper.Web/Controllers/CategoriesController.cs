@@ -98,6 +98,11 @@ public sealed class CategoriesController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(Guid id, EditCategoryViewModel model, CancellationToken cancellationToken)
     {
+        if (id == Guid.Empty)
+        {
+            return NotFound();
+        }
+
         if (id != model.Id)
         {
             return BadRequest();
