@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Vanderkeep.Dominio.Entidades;
 using Vanderkeep.Infraestrutura.Identity;
 
 namespace Vanderkeep.Infraestrutura.Persistencia;
@@ -12,6 +13,12 @@ public class VanderkeepDbContext
         : base(options)
     {
     }
+
+    public DbSet<Note> Notes => Set<Note>();
+
+    public DbSet<Category> Categories => Set<Category>();
+
+    public DbSet<NoteCategory> NoteCategories => Set<NoteCategory>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

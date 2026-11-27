@@ -107,6 +107,8 @@ public sealed class SmokeTests : IClassFixture<VanderkeepWebApplicationFactory>
 
         Assert.NotNull(provider.GetRequiredService<VanderkeepDbContext>());
         Assert.NotNull(provider.GetRequiredService<IUnitOfWork>());
+        Assert.NotNull(provider.GetRequiredService<INoteRepository>());
+        Assert.NotNull(provider.GetRequiredService<ICategoryRepository>());
         Assert.NotNull(provider.GetRequiredService<IDateTimeProvider>());
         Assert.NotNull(provider.GetRequiredService<ICurrentUserService>());
     }
