@@ -1,0 +1,123 @@
+@using VKeeper.Web.Servicos
+@model VKeeper.Web.ViewModels.Trash.TrashListViewModel
+@{
+    ViewData["Title"] = "Lixeira";
+}
+
+<section class="py-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Lixeira</h1>
+            <p class="text-muted small mb-0">
+                Restaure notas excluídas por engano ou remova-as definitivamente.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            @if (Model.Notes.TotalCount > 0)
+            {
+                <a asp-action="Empty" class="btn btn-outline-danger">Esvaziar lixeira</a>
+            }
+            <a asp-controller="Notes" asp-action="Index" class="btn btn-outline-secondary">Voltar às notas</a>
+        </div>
+    </div>
+
+    @if (Model.Notes.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-5 text-center">
+                <h2 class="h5 fw-semibold mb-2">Sua lixeira está vazia</h2>
+                <p class="text-muted mb-4">Notas enviadas para a lixeira aparecem aqui antes da exclusão definitiva.</p>
+                <a asp-controller="Notes" asp-action="Index" class="btn btn-outline-primary">Ver notas ativas</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            @foreach (var note in Model.Notes.Items)
+            {
+                <div class="col">
+                    <article class="card h-100 border-0 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h2 class="h6 fw-bold mb-0">@note.Title</h2>
+                                <span class="badge @NotePriorityDisplay.GetBadgeClass(note.Priority) flex-shrink-0">
+                                    @NotePriorityDisplay.GetLabel(note.Priority)
+                                </span>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(note.DescriptionPreview))
+                            {
+                                <p class="card-text text-muted small mb-3 flex-grow-1">@note.DescriptionPreview</p>
+                            }
+                            else
+                            {
+                                <p class="card-text text-muted small fst-italic mb-3 flex-grow-1">Sem descrição.</p>
+                            }
+
+                            @if (note.Categories.Count > 0)
+                            {
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    @foreach (var category in note.Categories)
+                                    {
+                                        <span class="badge text-bg-light border text-dark">@category.Title</span>
+                                    }
+                                </div>
+                            }
+
+                            <div class="small text-secondary mt-auto">
+                                Enviada para lixeira em @note.DeletedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 pt-0 pb-3">
+                            <div class="d-flex gap-2">
+                                <form asp-action="Restore" asp-route-id="@note.Id" method="post" class="d-inline flex-grow-1">
+                                    <button type="submit" class="btn btn-outline-success btn-sm w-100">Restaurar</button>
+                                </form>
+                                <a asp-action="Delete" asp-route-id="@note.Id" class="btn btn-outline-danger btn-sm">Excluir</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+
+        @if (Model.Notes.TotalPages > 1)
+        {
+            <nav aria-label="Paginação da lixeira" class="mt-4">
+                <ul class="pagination justify-content-center mb-0">
+                    @if (Model.Notes.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="@(Model.Notes.PageNumber - 1)">Anterior</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-disabled="true">Anterior</span>
+                        </li>
+                    }
+                    @for (var p = 1; p <= Model.Notes.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == Model.Notes.PageNumber ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@p">@p</a>
+                        </li>
+                    }
+                    @if (Model.Notes.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="@(Model.Notes.PageNumber + 1)">Próxima</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-disabled="true">Próxima</span>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+</section>

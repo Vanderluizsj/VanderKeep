@@ -423,13 +423,13 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
   - Testes unitários de `CategoryService` (`14` casos) e testes de integração contra `VKeeperDb_Test` (`7` casos cobrindo acesso anônimo, CRUD alfabético, unicidade por usuário, contagem ignorando lixeira, exclusão preservando notas, CSRF e anti-IDOR).
 - **Status:** Concluída, validada contra `VKeeperDb_Test` (`100/100` testes) e aprovada na 1ª rodada em revisão independente (2026-11-27).
 
-### Fase 5 — Casos de Uso e MVC de Notas e Lixeira (CRUD, N:N, Pin, Arquivar, Lixeira, Busca e Filtros)
+### Fase 5 — Casos de Uso e MVC de Notas e Lixeira (CRUD, N:N, Pin, Arquivar, Lixeira, Busca e Filtros) *(Concluída)*
 - **Objetivo:** entregar o núcleo funcional completo do VKeeper.
 - **Entregáveis:**
-  - `NoteService`, queries, requests/DTOs e validadores FluentValidation sob `VKeeper.Aplicacao/Notas/`.
-  - `NotesController` e `TrashController`, ViewModels e Razor Views em Bootstrap (Notas Ativas, Arquivadas, Lixeira, Detalhes, Criar, Editar, confirmações de exclusão permanente e esvaziar lixeira).
-  - Testes unitários de `NoteService` e testes de integração cobrindo N:N, exclusão de categoria preservando notas, filtros combinados, paginação (12 itens), Pin/Archive, Lixeira (mover, restaurar, excluir permanentemente, esvaziar) e testes anti-IDOR completos.
-- **Critério de conclusão:** critérios de aceite de US04 a US10 e US13 validados com testes unitários e de integração verdes.
+  - `NoteService`, queries, requests/DTOs e validadores FluentValidation sob `VKeeper.Aplicacao/Notas/` (`CriarNota`, `AtualizarNota`, `ListarNotas`, `ObterNota`, `Lixeira`) com validação estrita de propriedade de categorias (`RN03`) e normalização de página efetiva (`page > TotalPages`).
+  - `NotesController` e `TrashController`, `NotePriorityDisplay`, ViewModels com `[EnumDataType]` e Razor Views em Bootstrap 5 (`_NotesList`, `Index`, `Archived`, `Details`, `Create`, `Edit`, `Trash/Index`, `Trash/Delete`, `Trash/Empty`), além do redirecionamento autenticado direto para `/Notes` (`HomeController` e `AccountController`) e navbar completa.
+  - Testes unitários de `NoteService` (`8` casos) e testes de integração contra `VKeeperDb_Test` (`15` casos cobrindo N:N, `RN03` em `Create`/`Edit`, filtros combinados, ordenação, paginação de 12 itens com clamp de página, Pin/Archive, Lixeira completa, anti-Open Redirect, CSRF e anti-IDOR completo).
+- **Status:** Concluída, validada contra `VKeeperDb_Test` (`123/123` testes) e aprovada em revisão técnica e de segurança independente (2026-11-27).
 
 ### Fase 6 — Polimento de UX, Hardening, Workflow CI e Fechamento do MVP
 - **Objetivo:** finalizar acabamentos de interface, revisar segurança/desempenho, configurar o workflow no GitHub Actions e consolidar documentação final.

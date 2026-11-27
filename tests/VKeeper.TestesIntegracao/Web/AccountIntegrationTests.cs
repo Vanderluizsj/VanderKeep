@@ -40,13 +40,13 @@ public sealed class AccountIntegrationTests
         var registerResponse = await RegisterUserAsync(client, displayName, email, "SenhaForte1");
 
         Assert.Equal(HttpStatusCode.Redirect, registerResponse.StatusCode);
-        Assert.Equal("/", registerResponse.Headers.Location?.OriginalString);
+        Assert.Equal("/Notes", registerResponse.Headers.Location?.OriginalString);
 
-        var homeResponse = await client.GetAsync("/");
-        var homeHtml = await homeResponse.Content.ReadAsStringAsync();
-        Assert.Equal(HttpStatusCode.OK, homeResponse.StatusCode);
-        Assert.Contains(displayName, homeHtml);
-        Assert.Contains("Alterar senha", homeHtml);
+        var notesResponse = await client.GetAsync("/Notes");
+        var notesHtml = await notesResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.OK, notesResponse.StatusCode);
+        Assert.Contains(displayName, notesHtml);
+        Assert.Contains("Alterar senha", notesHtml);
 
         var changePasswordResponse = await client.GetAsync("/Account/ChangePassword");
         Assert.Equal(HttpStatusCode.OK, changePasswordResponse.StatusCode);
@@ -143,7 +143,7 @@ public sealed class AccountIntegrationTests
         var response = await LoginUserAsync(loginClient, email, "SenhaForte1", returnUrl: unsafeReturnUrl);
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-        Assert.Equal("/", response.Headers.Location?.OriginalString);
+        Assert.Equal("/Notes", response.Headers.Location?.OriginalString);
     }
 
     [Fact]
@@ -211,8 +211,8 @@ public sealed class AccountIntegrationTests
         using var client = CreateClientNoRedirect();
         await RegisterUserAsync(client, "Usuario Logout", CreateUniqueEmail(), "SenhaForte1");
 
-        var homeHtml = await client.GetStringAsync("/");
-        var token = AntiForgeryHelper.ExtractRequestVerificationToken(homeHtml);
+        var notesHtml = await client.GetStringAsync("/Notes");
+        var token = AntiForgeryHelper.ExtractRequestVerificationToken(notesHtml);
 
         using var logoutForm = new FormUrlEncodedContent(new Dictionary<string, string>
         {

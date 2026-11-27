@@ -233,6 +233,6 @@ public sealed class AccountController : Controller
             return LocalRedirect(safeUrl);
         }
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Notes");
     }
 }

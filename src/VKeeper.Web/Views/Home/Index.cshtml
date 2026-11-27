@@ -1,4 +1,3 @@
-@using VKeeper.Aplicacao.Comum
 @{
     ViewData["Title"] = "Início";
 }
@@ -10,28 +9,15 @@
                 <div class="card-body p-4 p-md-5 text-center">
                     <h1 class="display-6 fw-bold mb-3">VKeeper</h1>
                     <p class="lead text-muted mb-4">
-                        Organize suas anotações pessoais por prioridade, categorias, fixação, arquivamento e lixeira com segurança.
+                        Organize suas anotações pessoais por prioridade, múltiplas categorias, fixação, arquivamento e lixeira com total privacidade.
                     </p>
-
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        var displayName = User.FindFirst(CustomClaimTypes.DisplayName)?.Value
-                            ?? User.Identity.Name;
-                        <p class="mb-4">
-                            Sessão ativa como <strong>@displayName</strong>. Gerencie suas categorias agora — os módulos de notas e lixeira chegam na próxima fase.
-                        </p>
-                        <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <a class="btn btn-primary px-4" asp-controller="Categories" asp-action="Index">Gerenciar categorias</a>
-                            <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <a class="btn btn-primary px-4" asp-controller="Account" asp-action="Register">Criar conta</a>
-                            <a class="btn btn-outline-secondary px-4" asp-controller="Account" asp-action="Login">Entrar</a>
-                        </div>
-                    }
+                    <p class="text-secondary small mb-4">
+                        Acesse sua conta ou cadastre-se gratuitamente para começar a criar e organizar suas notas.
+                    </p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a class="btn btn-primary px-4" asp-controller="Account" asp-action="Login">Entrar</a>
+                        <a class="btn btn-outline-primary px-4" asp-controller="Account" asp-action="Register">Criar minha conta</a>
+                    </div>
                 </div>
             </div>
         </div>

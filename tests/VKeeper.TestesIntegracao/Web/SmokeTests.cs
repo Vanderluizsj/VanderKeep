@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using VKeeper.Aplicacao.Categorias;
 using VKeeper.Aplicacao.Comum;
+using VKeeper.Aplicacao.Notas;
 using VKeeper.Dominio.Interfaces;
 using VKeeper.Infraestrutura.Persistencia;
 using VKeeper.TestesIntegracao.Infraestrutura;
@@ -112,6 +113,7 @@ public sealed class SmokeTests
         Assert.NotNull(provider.GetRequiredService<INoteRepository>());
         Assert.NotNull(provider.GetRequiredService<ICategoryRepository>());
         Assert.NotNull(provider.GetRequiredService<ICategoryService>());
+        Assert.NotNull(provider.GetRequiredService<INoteService>());
         Assert.NotNull(provider.GetRequiredService<IDateTimeProvider>());
         Assert.NotNull(provider.GetRequiredService<ICurrentUserService>());
     }

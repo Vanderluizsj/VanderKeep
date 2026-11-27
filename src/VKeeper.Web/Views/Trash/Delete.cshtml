@@ -1,0 +1,41 @@
+@using VKeeper.Web.Servicos
+@model VKeeper.Web.ViewModels.Trash.DeleteNotePermanentlyViewModel
+@{
+    ViewData["Title"] = "Excluir nota permanentemente";
+}
+
+<section class="py-3">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card border-danger shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 fw-bold text-danger mb-2">Excluir nota permanentemente</h1>
+                    <p class="mb-3">
+                        Tem certeza que deseja excluir definitivamente a nota <strong>@Model.Title</strong>?
+                    </p>
+                    <div class="d-flex flex-wrap gap-1 align-items-center mb-3">
+                        <span class="badge @NotePriorityDisplay.GetBadgeClass(Model.Priority)">
+                            Prioridade: @NotePriorityDisplay.GetLabel(Model.Priority)
+                        </span>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <span class="badge text-bg-light border text-dark">@category.Title</span>
+                        }
+                    </div>
+                    <p class="small text-muted mb-3">
+                        Enviada para a lixeira em @Model.DeletedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm").
+                    </p>
+                    <div class="alert alert-danger small mb-4" role="alert">
+                        Esta ação é irreversível. A nota e seus vínculos com categorias serão removidos permanentemente.
+                    </div>
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger flex-grow-1">Excluir permanentemente</button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

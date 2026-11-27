@@ -1,0 +1,105 @@
+@using VKeeper.Web.Servicos
+@model VKeeper.Web.ViewModels.Notes.NoteDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var detailsUrl = Url.Action("Details", "Notes", new { id = Model.Id });
+    var backAction = Model.IsArchived ? "Archived" : "Index";
+}
+
+<section class="py-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="mb-3">
+                <a asp-action="@backAction" class="btn btn-outline-secondary btn-sm">
+                    &larr; @(Model.IsArchived ? "Voltar às arquivadas" : "Voltar às notas")
+                </a>
+            </div>
+
+            <article class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                        <h1 class="h3 fw-bold mb-0">@Model.Title</h1>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <span class="badge @NotePriorityDisplay.GetBadgeClass(Model.Priority)">
+                                Prioridade: @NotePriorityDisplay.GetLabel(Model.Priority)
+                            </span>
+                            @if (Model.IsPinned)
+                            {
+                                <span class="badge text-bg-warning">Fixada</span>
+                            }
+                            @if (Model.IsArchived)
+                            {
+                                <span class="badge text-bg-secondary">Arquivada</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.Categories.Count > 0)
+                    {
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            @foreach (var category in Model.Categories)
+                            {
+                                <span class="badge text-bg-light border text-dark">@category.Title</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="small text-muted mb-4">
+                        Criada em @Model.CreatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                        &bull;
+                        Última atualização em @Model.UpdatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                    </div>
+
+                    <hr />
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <div class="mb-4" style="white-space: pre-wrap;">@Model.Description</div>
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic mb-4">Esta nota não possui descrição.</p>
+                    }
+
+                    <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Editar</a>
+
+                        @if (!Model.IsArchived)
+                        {
+                            @if (Model.IsPinned)
+                            {
+                                <form asp-action="Unpin" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                    <input type="hidden" name="returnUrl" value="@detailsUrl" />
+                                    <button type="submit" class="btn btn-outline-warning btn-sm">Desafixar</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-action="Pin" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                    <input type="hidden" name="returnUrl" value="@detailsUrl" />
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Fixar</button>
+                                </form>
+                            }
+
+                            <form asp-action="Archive" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                <input type="hidden" name="returnUrl" value="@detailsUrl" />
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Arquivar</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Unarchive" asp-route-id="@Model.Id" method="post" class="d-inline">
+                                <input type="hidden" name="returnUrl" value="@detailsUrl" />
+                                <button type="submit" class="btn btn-outline-success btn-sm">Desarquivar</button>
+                            </form>
+                        }
+
+                        <form asp-action="MoveToTrash" asp-route-id="@Model.Id" method="post" class="d-inline ms-auto">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Mover para lixeira</button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>

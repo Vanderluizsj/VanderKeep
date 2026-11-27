@@ -91,10 +91,13 @@ public sealed class NoteRepository : INoteRepository
             return (Array.Empty<Note>(), 0);
         }
 
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        var effectivePage = Math.Min(pageNumber, totalPages);
+
         IOrderedQueryable<Note> orderedQuery = ApplyOrdering(query, filter);
 
         var items = await orderedQuery
-            .Skip((pageNumber - 1) * pageSize)
+            .Skip((effectivePage - 1) * pageSize)
             .Take(pageSize)
             .Include(n => n.NoteCategories)
             .ThenInclude(nc => nc.Category)

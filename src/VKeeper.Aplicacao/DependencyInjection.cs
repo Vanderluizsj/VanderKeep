@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using VKeeper.Aplicacao.Categorias;
+using VKeeper.Aplicacao.Notas;
 
 namespace VKeeper.Aplicacao;
 
@@ -10,6 +11,7 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<INoteService, NoteService>();
         return services;
     }
 }

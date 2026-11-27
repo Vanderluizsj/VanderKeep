@@ -1,4 +1,8 @@
 @using VKeeper.Aplicacao.Comum
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -20,13 +24,30 @@
                 </button>
                 <div class="collapse navbar-collapse" id="mainNavbar">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">Início</a>
-                        </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Categories" asp-action="Index">Categorias</a>
+                                <a class="nav-link @(currentController == "Notes" && currentAction != "Archived" ? "active" : "")"
+                                   asp-controller="Notes" asp-action="Index">Notas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Notes" && currentAction == "Archived" ? "active" : "")"
+                                   asp-controller="Notes" asp-action="Archived">Arquivadas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Trash" ? "active" : "")"
+                                   asp-controller="Trash" asp-action="Index">Lixeira</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Categories" ? "active" : "")"
+                                   asp-controller="Categories" asp-action="Index">Categorias</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Home" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">Início</a>
                             </li>
                         }
                     </ul>
@@ -40,7 +61,8 @@
                                 <span class="navbar-text text-light small me-md-2">Olá, <strong>@displayName</strong></span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
+                                <a class="nav-link @(currentController == "Account" && currentAction == "ChangePassword" ? "active" : "")"
+                                   asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
@@ -54,7 +76,7 @@
                                 <a class="nav-link" asp-controller="Account" asp-action="Login">Entrar</a>
                             </li>
                             <li class="nav-item">
-                                <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Criar conta</a>
+                                <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Criar minha conta</a>
                             </li>
                         }
                     </ul>

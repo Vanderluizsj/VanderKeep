@@ -1,0 +1,270 @@
+@using VKeeper.Dominio.Enums
+@using VKeeper.Web.Servicos
+@model VKeeper.Web.ViewModels.Notes.NoteListViewModel
+@{
+    var listAction = Model.IsArchivedView ? "Archived" : "Index";
+    var currentUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<section class="py-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">@(Model.IsArchivedView ? "Notas arquivadas" : "Minhas notas")</h1>
+            <p class="text-muted small mb-0">
+                @(Model.IsArchivedView
+                    ? "Notas concluídas ou guardadas para referência futura."
+                    : "Crie, priorize, fixe e organize suas anotações pessoais por categorias.")
+            </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            @if (Model.IsArchivedView)
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary">Ver notas ativas</a>
+            }
+            else
+            {
+                <a asp-action="Create" class="btn btn-primary">Nova nota</a>
+                <a asp-action="Archived" class="btn btn-outline-secondary">Arquivadas</a>
+            }
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="@listAction" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label small text-muted mb-1">Buscar</label>
+                    <input id="searchTerm" name="searchTerm" value="@Model.Filter.SearchTerm"
+                           class="form-control form-control-sm" placeholder="Título ou descrição..." />
+                </div>
+                <div class="col-md-3">
+                    <label for="categoryId" class="form-label small text-muted mb-1">Categoria</label>
+                    <select id="categoryId" name="categoryId" class="form-select form-select-sm">
+                        <option value="">Todas as categorias</option>
+                        @foreach (var category in Model.AvailableCategories)
+                        {
+                            <option value="@category.Id" selected="@(Model.Filter.CategoryId == category.Id)">@category.Title</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="priority" class="form-label small text-muted mb-1">Prioridade</label>
+                    <select id="priority" name="priority" class="form-select form-select-sm">
+                        <option value="">Todas</option>
+                        @foreach (var priority in Enum.GetValues<NotePriority>())
+                        {
+                            <option value="@priority" selected="@(Model.Filter.Priority == priority)">@NotePriorityDisplay.GetLabel(priority)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="sortBy" class="form-label small text-muted mb-1">Ordenar por</label>
+                    <select id="sortBy" name="sortBy" class="form-select form-select-sm">
+                        <option value="@NoteSortBy.UpdatedAtDesc" selected="@(Model.Filter.SortBy == NoteSortBy.UpdatedAtDesc)">Última atualização</option>
+                        <option value="@NoteSortBy.CreatedAtDesc" selected="@(Model.Filter.SortBy == NoteSortBy.CreatedAtDesc)">Mais recentes</option>
+                        <option value="@NoteSortBy.PriorityDesc" selected="@(Model.Filter.SortBy == NoteSortBy.PriorityDesc)">Maior prioridade</option>
+                        <option value="@NoteSortBy.TitleAsc" selected="@(Model.Filter.SortBy == NoteSortBy.TitleAsc)">Título (A-Z)</option>
+                    </select>
+                </div>
+                <div class="col-12 d-flex gap-2 justify-content-end">
+                    @if (Model.Filter.HasActiveFilters)
+                    {
+                        <a asp-action="@listAction" class="btn btn-outline-secondary btn-sm">Limpar filtros</a>
+                    }
+                    <button type="submit" class="btn btn-dark btn-sm px-3">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Notes.Items.Count == 0)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-5 text-center">
+                @if (Model.Filter.HasActiveFilters)
+                {
+                    <h2 class="h5 fw-semibold mb-2">Nenhuma nota encontrada com os filtros informados</h2>
+                    <p class="text-muted mb-4">Tente ajustar os termos da busca ou limpar os filtros ativos.</p>
+                    <a asp-action="@listAction" class="btn btn-outline-primary">Limpar filtros</a>
+                }
+                else if (Model.IsArchivedView)
+                {
+                    <h2 class="h5 fw-semibold mb-2">Nenhuma nota arquivada</h2>
+                    <p class="text-muted mb-4">Notas arquivadas aparecem aqui para manter sua lista principal sempre limpa.</p>
+                    <a asp-action="Index" class="btn btn-outline-primary">Voltar às notas ativas</a>
+                }
+                else
+                {
+                    <h2 class="h5 fw-semibold mb-2">Você ainda não possui notas</h2>
+                    <p class="text-muted mb-4">Crie sua primeira anotação e, se quiser, organize tudo com categorias.</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a asp-action="Create" class="btn btn-primary">Criar primeira nota</a>
+                        <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-secondary">Gerenciar categorias</a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3 small text-muted">
+            <span>
+                Exibindo <strong>@Model.Notes.Items.Count</strong> de <strong>@Model.Notes.TotalCount</strong>
+                @(Model.Notes.TotalCount == 1 ? "nota" : "notas")
+            </span>
+            @if (Model.Notes.TotalPages > 1)
+            {
+                <span>Página @Model.Notes.PageNumber de @Model.Notes.TotalPages</span>
+            }
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            @foreach (var note in Model.Notes.Items)
+            {
+                <div class="col">
+                    <article class="card h-100 shadow-sm @(note.IsPinned ? "border-warning border-2" : "border-0")">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h2 class="h6 fw-bold mb-0">
+                                    <a asp-action="Details" asp-route-id="@note.Id" class="text-decoration-none text-dark stretched-link">
+                                        @note.Title
+                                    </a>
+                                </h2>
+                                <span class="badge @NotePriorityDisplay.GetBadgeClass(note.Priority) flex-shrink-0">
+                                    @NotePriorityDisplay.GetLabel(note.Priority)
+                                </span>
+                            </div>
+
+                            @if (note.IsPinned)
+                            {
+                                <div class="mb-2">
+                                    <span class="badge text-bg-warning">Fixada</span>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(note.DescriptionPreview))
+                            {
+                                <p class="card-text text-muted small mb-3 flex-grow-1">@note.DescriptionPreview</p>
+                            }
+                            else
+                            {
+                                <p class="card-text text-muted small fst-italic mb-3 flex-grow-1">Sem descrição.</p>
+                            }
+
+                            @if (note.Categories.Count > 0)
+                            {
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    @foreach (var category in note.Categories)
+                                    {
+                                        <span class="badge text-bg-light border text-dark">@category.Title</span>
+                                    }
+                                </div>
+                            }
+
+                            <div class="small text-secondary mt-auto">
+                                Atualizada em @note.UpdatedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white border-top-0 pt-0 pb-3 position-relative" style="z-index: 2;">
+                            <div class="d-flex flex-wrap gap-1">
+                                <a asp-action="Edit" asp-route-id="@note.Id" class="btn btn-outline-primary btn-sm">Editar</a>
+
+                                @if (!Model.IsArchivedView)
+                                {
+                                    @if (note.IsPinned)
+                                    {
+                                        <form asp-action="Unpin" asp-route-id="@note.Id" method="post" class="d-inline">
+                                            <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                            <button type="submit" class="btn btn-outline-warning btn-sm">Desafixar</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Pin" asp-route-id="@note.Id" method="post" class="d-inline">
+                                            <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm">Fixar</button>
+                                        </form>
+                                    }
+
+                                    <form asp-action="Archive" asp-route-id="@note.Id" method="post" class="d-inline">
+                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm">Arquivar</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Unarchive" asp-route-id="@note.Id" method="post" class="d-inline">
+                                        <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                        <button type="submit" class="btn btn-outline-success btn-sm">Desarquivar</button>
+                                    </form>
+                                }
+
+                                <form asp-action="MoveToTrash" asp-route-id="@note.Id" method="post" class="d-inline ms-auto">
+                                    <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Lixeira</button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+
+        @if (Model.Notes.TotalPages > 1)
+        {
+            <nav aria-label="Paginação de notas" class="mt-4">
+                <ul class="pagination justify-content-center mb-0">
+                    @if (Model.Notes.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link"
+                               asp-action="@listAction"
+                               asp-route-searchTerm="@Model.Filter.SearchTerm"
+                               asp-route-categoryId="@Model.Filter.CategoryId"
+                               asp-route-priority="@Model.Filter.Priority"
+                               asp-route-sortBy="@Model.Filter.SortBy"
+                               asp-route-page="@(Model.Notes.PageNumber - 1)">Anterior</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-disabled="true">Anterior</span>
+                        </li>
+                    }
+                    @for (var p = 1; p <= Model.Notes.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == Model.Notes.PageNumber ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="@listAction"
+                               asp-route-searchTerm="@Model.Filter.SearchTerm"
+                               asp-route-categoryId="@Model.Filter.CategoryId"
+                               asp-route-priority="@Model.Filter.Priority"
+                               asp-route-sortBy="@Model.Filter.SortBy"
+                               asp-route-page="@p">@p</a>
+                        </li>
+                    }
+                    @if (Model.Notes.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link"
+                               asp-action="@listAction"
+                               asp-route-searchTerm="@Model.Filter.SearchTerm"
+                               asp-route-categoryId="@Model.Filter.CategoryId"
+                               asp-route-priority="@Model.Filter.Priority"
+                               asp-route-sortBy="@Model.Filter.SortBy"
+                               asp-route-page="@(Model.Notes.PageNumber + 1)">Próxima</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-disabled="true">Próxima</span>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+</section>
