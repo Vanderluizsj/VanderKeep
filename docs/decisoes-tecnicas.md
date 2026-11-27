@@ -397,14 +397,14 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
   - Configuração base de `VKeeperDbContext`, inicialização de User Secrets em `VKeeper.Web` e `VKeeper.TestesIntegracao` e verificação de build + execução dos projetos de teste.
 - **Status:** Concluída e aprovada em revisão técnica independente (2026-11-26).
 
-### Fase 2 — Domínio e Persistência Core (Notas, Categorias N:N e Soft Delete)
+### Fase 2 — Domínio e Persistência Core (Notas, Categorias N:N e Soft Delete) *(Concluída)*
 - **Objetivo:** implementar o modelo de domínio completo (incluindo máquina de estados Ativa/Arquivada/Lixeira), mapeamentos Fluent API, repositórios, `UnitOfWork` e migrations iniciais.
 - **Entregáveis:**
-  - Entidades `Note`, `Category`, `NoteCategory`, enum `NotePriority`, exceções de domínio e interfaces `INoteRepository`, `ICategoryRepository`, `IUnitOfWork`.
+  - Entidades `Note`, `Category`, `NoteCategory`, enums `NotePriority` e `NoteSortBy`, exceções de domínio e interfaces `INoteRepository`, `ICategoryRepository`, `IUnitOfWork`.
   - `ApplicationUser : IdentityUser<Guid>`, `VKeeperDbContext`, configurações Fluent API (`Configuracoes/`), índice único `(UserId, NormalizedTitle)`, índice composto de `Notes` com `IsDeleted` e estratégia anti-cascade-paths (`ADR-13`).
-  - Migration inicial aplicada ao banco `VKeeperDb` no container `sqlserver-backend`.
-  - Testes unitários de domínio (`VKeeper.TestesUnitarios`) cobrindo todas as invariantes e transições de estado.
-- **Critério de conclusão:** migrations aplicadas com sucesso no SQL Server, testes unitários de domínio 100% aprovados e revisão concluída.
+  - Migration inicial (`20261127001307_InitialCreate`) aplicada com sucesso no banco `VKeeperDb` (container `sqlserver-backend`).
+  - Testes unitários de domínio (`VKeeper.TestesUnitarios`) cobrindo todas as invariantes, fronteiras e transições de estado.
+- **Status:** Concluída, auditada e validada com aplicação real da migration no SQL Server (2026-11-27).
 
 ### Fase 3 — Autenticação, Contas e Segurança (ASP.NET Core Identity)
 - **Objetivo:** implementar cadastro, login, logout, alteração de senha e infraestrutura de usuário autenticado (`ICurrentUserService`).
