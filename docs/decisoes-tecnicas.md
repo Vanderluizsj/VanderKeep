@@ -406,14 +406,14 @@ Cada fase deve seguir integralmente o fluxo definido em `docs/PROCESS.md` (Prepa
   - Testes unitários de domínio (`VKeeper.TestesUnitarios`) cobrindo todas as invariantes, fronteiras e transições de estado.
 - **Status:** Concluída, auditada e validada com aplicação real da migration no SQL Server (2026-11-27).
 
-### Fase 3 — Autenticação, Contas e Segurança (ASP.NET Core Identity)
+### Fase 3 — Autenticação, Contas e Segurança (ASP.NET Core Identity) *(Concluída)*
 - **Objetivo:** implementar cadastro, login, logout, alteração de senha e infraestrutura de usuário autenticado (`ICurrentUserService`).
 - **Entregáveis:**
-  - Configuração completa do ASP.NET Core Identity (política de senha, lockout, cookies seguros, CSRF global).
-  - `AccountController` e views MVC próprias em Bootstrap (Login, Registro, Alterar Senha, Acesso Negado).
-  - `CurrentUserService` integrado ao `HttpContext`.
-  - Testes de integração cobrindo cadastro, login, logout, alteração de senha, redirecionamento anônimo e validação de `ReturnUrl`.
-- **Critério de conclusão:** fluxo de autenticação validado ponta a ponta e aprovado em revisão de segurança pelo Reviewer.
+  - Configuração completa do ASP.NET Core Identity (`ApplicationUser` inicializando `Id = Guid.CreateVersion7()` no construtor, `VKeeperUserClaimsPrincipalFactory` com `CustomClaimTypes.DisplayName`, política de senha, lockout, cookies endurecidos em Identity/Antiforgery/TempData e CSRF global).
+  - `AccountController`, `IdentityErrorTranslator`, ViewModels e views MVC próprias em Bootstrap (`Register`, `Login`, `ChangePassword`, `AccessDenied` -> `403`, navbar autenticada em `_Layout.cshtml`).
+  - `CurrentUserService` integrado ao `HttpContext` e coberto por testes dedicados.
+  - Testes de integração contra o banco SQL Server isolado `VKeeperDb_Test` cobrindo cadastro, login, logout, alteração de senha, senha fraca, lockout efetivo, redirecionamento anônimo, validação de `ReturnUrl` local e proteção contra Open Redirect (`https://` e `//`), CSRF e atributos `Set-Cookie`.
+- **Status:** Concluída, validada contra `VKeeperDb_Test` e aprovada em revisão de segurança independente (2026-11-27).
 
 ### Fase 4 — Casos de Uso e MVC de Categorias
 - **Objetivo:** entregar o fluxo completo de gerenciamento de categorias pessoais.

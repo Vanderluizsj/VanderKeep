@@ -11,14 +11,14 @@ namespace VKeeper.Infraestrutura;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
-
-        services.AddDbContext<VKeeperDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        services.AddDbContext<VKeeperDbContext>((serviceProvider, options) =>
+        {
+            var resolvedConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+            var connectionString = resolvedConfiguration.GetConnectionString("DefaultConnection") ?? string.Empty;
+            options.UseSqlServer(connectionString);
+        });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<INoteRepository, NoteRepository>();

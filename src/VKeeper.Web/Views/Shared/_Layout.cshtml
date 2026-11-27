@@ -1,3 +1,4 @@
+@using VKeeper.Aplicacao.Comum
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -22,6 +23,34 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Início</a>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto align-items-md-center gap-md-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            var displayName = User.FindFirst(CustomClaimTypes.DisplayName)?.Value
+                                ?? User.Identity.Name
+                                ?? "Conta";
+                            <li class="nav-item">
+                                <span class="navbar-text text-light small me-md-2">Olá, <strong>@displayName</strong></span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-light btn-sm">Sair</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Entrar</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Register">Criar conta</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

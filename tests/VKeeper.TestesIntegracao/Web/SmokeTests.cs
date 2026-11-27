@@ -7,7 +7,8 @@ using VKeeper.TestesIntegracao.Infraestrutura;
 
 namespace VKeeper.TestesIntegracao.Web;
 
-public sealed class SmokeTests : IClassFixture<VKeeperWebApplicationFactory>
+[Collection(IntegrationTestCollection.Name)]
+public sealed class SmokeTests
 {
     private readonly VKeeperWebApplicationFactory _factory;
     private readonly HttpClient _client;

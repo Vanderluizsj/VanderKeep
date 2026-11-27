@@ -1,3 +1,4 @@
+@using VKeeper.Aplicacao.Comum
 @{
     ViewData["Title"] = "Início";
 }
@@ -11,9 +12,25 @@
                     <p class="lead text-muted mb-4">
                         Organize suas anotações pessoais por prioridade, categorias, fixação, arquivamento e lixeira com segurança.
                     </p>
-                    <p class="text-secondary small mb-0">
-                        Fundação da aplicação inicializada (Fase 1). Os módulos de autenticação, categorias, notas e lixeira serão entregues nas próximas fases do roadmap.
-                    </p>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        var displayName = User.FindFirst(CustomClaimTypes.DisplayName)?.Value
+                            ?? User.Identity.Name;
+                        <p class="mb-4">
+                            Sessão ativa como <strong>@displayName</strong>. Os módulos de categorias, notas e lixeira serão habilitados nas próximas fases.
+                        </p>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="ChangePassword">Alterar senha</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a class="btn btn-primary px-4" asp-controller="Account" asp-action="Register">Criar conta</a>
+                            <a class="btn btn-outline-secondary px-4" asp-controller="Account" asp-action="Login">Entrar</a>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
